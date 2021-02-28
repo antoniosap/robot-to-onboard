@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+"""driver.py: MultiWii protocol interface """
+
+__author__ = "Antonio Sapuppo"
+__copyright__ = "Copyright 2018"
+
+__license__ = "GPL"
+__version__ = "1.0"
+__maintainer__ = "Antonio Sapuppo"
+__email__ = "a.sapuppo@youus.it"
+__status__ = "Development"
+
+import rospy
+import sensor_msgs.msg as sensor_msgs
+from MultiWii import MultiWii
+
+
+# start:
+# conda activate ros-env
+# roscore
+# ---------------------------------------------------------------------
+
+
+if __name__ == '__main__':
+    # registering node in ros master
+    rospy.init_node('uollibot_base_naze', log_level=rospy.DEBUG)
+    # begin node code
+    rospy.loginfo('Starting uollibot_base_naze')
+    #
+    battery = sensor_msgs.BatteryState()
+    batteryState = rospy.Publisher("batteryState", sensor_msgs.BatteryState, queue_size=10)
+
+    board = MultiWii()
+    board.connect(portName="/dev/ttyUSB0", baudRate=115200)
+    rate = rospy.Rate(0.3)  # hz
+    try:
+        while not rospy.is_shutdown():
+            response = board.getAnalog()
+            battery.voltage = response['vbat']
+            battery.current = -response['amperage']
+            battery.design_capacity = 2200 # mAh
+            battery.present = True
+            power_supply_technology = sensor_msgs.BatteryState.POWER_SUPPLY_TECHNOLOGY_LIPO
+            battery.location= "slot-a"
+            battery.serial_number = "2016"
+            #
+            #powermetersum = response['powermetersum']
+            #message = "V = {:+.2f} \t A = {:+.2f} \t"\
+            #    .format(float(battery.voltage),
+            #            float(battery.current))
+            #rospy.loginfo(message)
+            #
+            batteryState.publish(battery)
+            #
+            rate.sleep()
+    except Exception as error:
+        rospy.logerr("Error on Main: "+str(error))
+    except rospy.ROSInterruptException:
+        board.disconnect()
+        rospy.loginfo("Shutdown battery manager")
+

@@ -1,0 +1,481 @@
+ 692  sudo apt upgrade
+  693  sudo raspi-config
+  694  sudo reboot %% exit
+  695  sudo reboot && exit
+  696  pip list
+  697  pip install -U pip
+  698  pip show opencv
+  699  pip info opencv
+  700  pip help
+  701  pip install -U pip==9.0.1
+  702  exit
+  703  pip list
+  704  sudo pip install -U pip
+  705  pip list
+  706  pip3 list
+  707  pip3 install -U pip
+  708  pip3 list
+  709  pip list
+  710  pip3 install -U pip3
+  711  sudo pip3 list
+  712  pip3 list
+  713  sudo pip3 list
+  714  sudo pip3 info opencv
+  715  sudo pip3 show opencv
+  716  sudo pip3 info opencv-python
+  717  sudo pip3 show opencv-python
+  718  SciVision, Inc.
+  719  COMPILE OPENCV 3.4 FOR ANACONDA PYTHON 3.7, 3.6, 3.5, 3.4 AND 2.7
+  720  Related:
+  721  easy no-compile install OpenCV for Python
+  722  Compile OpenCV with extra contributed modules
+  723  GNU Make parallel build
+  724  OpenCV 3 works with Python 2.7, 3.4, 3.5, 3.6, 3.7. This procedure was tested with Ubuntu Linux on laptop, and Raspberry Pi 3 with Raspbian 9 stretch.
+  725  PREREQS:
+  726  assumes preferred Python exe is aliased to (it runs when you type) python Check which python to be sure it’s NOT pointing to /usr/bin/python or this install will not work!
+  727  Optionally, you can install free Intel IPP, TBB and/or MKL as well.
+  728  Linux
+  729  apt install cmake gcc g++ git libjpeg-dev libpng-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev pkg-config libgtk2.0-dev libopenblas-dev libatlas-base-dev liblapack-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavcodec-dev libavutil-dev libavfilter-dev libavformat-dev libavresample-dev ffmpeg
+  730  Mac OSX
+  731  brew install git cmake pkg-config jpeg libpng libtiff openexr eigen tbb
+  732  BSD
+  733  These are untested, but should give a starting point.
+  734  pkg install install cmake gcc g++ git jpeg-turbo png tiff openblas atlas-math lapack eigen libtheora libvorbis libx264 tbb yasm libopencore-amr gstreamer ffmpeg
+  735  BUILD PYTHON OPENCV3
+  736  Download the latest OpenCV Source code zip file.
+  737  unzip 3*.zip
+  738  cd opencv*
+  739  mkdir release
+  740  cd release
+  741  cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=ON -DWITH_OPENCL=ON -DWITH_IPP=ON -DWITH_TBB=ON -DWITH_EIGEN=ON -DWITH_V4L=ON -DWITH_VTK=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+  742  If you have trouble with Cmake, consider cmake-gui or using the simplest Cmake script at the bottom of this page.
+  743  make -j -l 2
+  744  make install  # not sudo, except for Raspberry Pi
+  745  Note: especially for embedded systems like the Raspberry Pi, consider make -j -l 2 to avoid over-temperature and under-voltage warnings (in general when compiling on Raspberry Pi, not just for OpenCV).
+  746  which results in something like this Gist:
+  747  2. TEST OPENCV
+  748  from time import time
+  749  from numpy import uint8
+  750  from numpy.random import rand
+  751  import cv2
+  752  xy=(512,512)
+  753  Nf = 500
+  754  def fpsopencv(dat):
+  755  imgs = (rand(Nf,xy[0],xy[1])*255).astype(uint8)
+  756  fps = fpsopencv(imgs)
+  757  print(fps,'fps')
+  758  This should play a random noise movie.
+  759  Fix OpenCV errors
+  760  “MODULENOTFOUNDERROR: NO MODULE NAMED ‘CV2’”
+  761  Ensure that desired Python site-packages found with
+  762  python -c "import sys; print(next(p for p in sys.path if 'site-packages' in p))"
+  763  contains
+  764  Windows: cv2.*.pyd
+  765  Linux: cv2.*.so
+  766  IMPORTERROR: ~/MINICONDA3/LIB/LIBSTDC++.SO.6: VERSION `GLIBCXX_3.4.22’ NOT FOUND (REQUIRED BY ~/MINICONDA3/LIB/LIBOPENCV_OBJDETECT.SO.3)
+  767  Use a more up to date system libstdc++ by
+  768  cd ~/miniconda3/lib
+  769  rm libstdc++.so.6
+  770  ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+  771  If you get error
+  772  /USR/INCLUDE/C++/6/CSTDLIB:75:25: FATAL ERROR: STDLIB.H: NO SUCH FILE OR DIRECTORY #INCLUDE_NEXT
+  773  or
+  774  ~/MINICONDA3/LIB/LIBOPENCV_OBJDETECT.SO.3: UNDEFINED SYMBOL: _ZTINST6THREAD6_STATEE
+  775  then try using g++ 5
+  776  Disable use of Nvidia CUDA when compiling OpenCV via -DWITH_CUDA=OFF. Because Cuda takes so much longer to compile, even if you have the GPU, maybe first try without CUDA, to see if OpenCV3 is going to work for you, then recompile with CUDA.
+  777  To avoid the libopencv\_imgcodecs.so.3: undefined reference to TIFFOpen@LIBTIFF_4.0 type errors, I added the -DBUILD_TIFF=ON option
+  778  If you get the error like
+  779  LIB/LIBM.SO.6: VERSION GLIBC_2.15 NOT FOUND (REQUIRED BY /USR/LIB/X86_64-LINUX-GNU/LIBX264.SO.142)
+  780  then try as a fix to GLIBC_2.15 not found
+  781  cd ~/anaconda3/lib
+  782  mv libm.so.6 libm.so.6.bak
+  783  If you get error
+  784  SIGILL ILLEGAL INSTRUCTION (CORE DUMPED)
+  785  when typing
+  786  import cv2
+  787  try to get more information by typing in Terminal
+  788  sudo sysctl -w kernel.core_pattern=core
+  789  ulimit -c unlimited
+  790  and rerun the command that gave the core dumped error. Now you’ll have a file core in that directory. Type in Terminal
+  791  gdb python core
+  792  to get hints about the failure.
+  793  Minimal Install
+  794  This has just the stuff needed for a basic OpenCV install for Python 3.
+  795  cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=OFF -DWITH_OPENCL=OFF -DWITH_IPP=OFF -DWITH_TBB=OFF -DWITH_EIGEN=OFF -DWITH_V4L=OFF -DWITH_VTK=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+  796  NOTES
+  797  libjasper-dev was removed from Ubuntu > 16.04
+  798  Intel MKL installation
+  799  Download free Intel MKL.
+  800  extract to /tmp and type
+  801   ./install_GUI.sh
+  802  sudo is not needed, it will install to ~/intel
+  803  reference
+  804  trouble installing into desired Python
+  805  Be sure your desired Python is under
+  806  which python
+  807  Consider adding this to your cmake shell command:
+  808  -DCMAKE_INSTALL_PREFIX=$(python -c "import sys; print(sys.prefix)") -DPYTHON3_EXECUTABLE=$(which python) -DPYTHON3_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") -DPYTHON3_PACKAGES_PATH=$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+  809  Tags: conda, opencv
+  810  Categories: python
+  811  Comments
+  812  Written by Michael Hirsch, Ph.D. // 2018-08-30
+  813  ‹›
+  814     About RSS Feed
+  815  apt install cmake gcc g++ git libjpeg-dev libpng-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev pkg-config libgtk2.0-dev libopenblas-dev libatlas-base-dev liblapack-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavcodec-dev libavutil-dev libavfilter-dev libavformat-dev libavresample-dev ffmpeg
+  816  sudo apt install cmake gcc g++ git libjpeg-dev libpng-dev libtiff5-dev libavcodec-dev libavformat-dev libswscale-dev pkg-config libgtk2.0-dev libopenblas-dev libatlas-base-dev liblapack-dev libeigen3-dev libtheora-dev libvorbis-dev libxvidcore-dev libx264-dev sphinx-common libtbb-dev yasm libopencore-amrnb-dev libopencore-amrwb-dev libopenexr-dev libgstreamer-plugins-base1.0-dev libavcodec-dev libavutil-dev libavfilter-dev libavformat-dev libavresample-dev ffmpeg
+  817  exit
+  818  history
+  819  ll
+  820  cd workspace-ros/
+  821  ll
+  822  cd ..
+  823  mkdir workspace
+  824  cd workspace
+  825  wget https://github.com/opencv/opencv/archive/4.0.0.zip
+  826  ll
+  827  unzip 4.0.0.zip
+  828  df
+  829  ll
+  830  cd opencv-4.0.0/
+  831  ll
+  832  mkdir release
+  833  cd release/
+  834  ll
+  835  cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=ON -DWITH_OPENCL=ON -DWITH_IPP=ON -DWITH_TBB=ON -DWITH_EIGEN=ON -DWITH_V4L=ON -DWITH_VTK=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+  836  make -j -l 2
+  837  df
+  838  make -j -l 2
+  839  df
+  840  make -j1 -l 2
+  841  cmake -DBUILD_TIFF=ON -DBUILD_opencv_java=OFF -DWITH_CUDA=OFF -DWITH_OPENGL=ON -DWITH_OPENCL=ON -DWITH_IPP=OFF -DWITH_TBB=ON -DWITH_EIGEN=ON -DWITH_V4L=ON -DWITH_VTK=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DCMAKE_BUILD_TYPE=RELEASE ..
+  842  make -j1 -l 2
+  843  ll
+  844  ./setup_vars.sh
+  845  python
+  846  export PYTHONPATH="/home/pi/workspace/opencv-4.0.0/release/python_loader":$PYTHONPATH
+  847  python
+  848  python3
+  849  python
+  850  df
+  851  ll
+  852  cd ..
+  853  ll
+  854  cd ..
+  855  ll
+  856  roslaunch uollibot_base start_base.launch
+  857  df
+  858  df -h
+  859  exit
+  860  sudo raspi-config
+  861  sudo reboot
+  862  df
+  863  python
+  864  ll
+  865  exit
+  866  man spivid
+  867  man raspivid
+  868  whereis raspivid
+  869  man raspivid
+  870  man raspvid
+  871  sudo apt install vlc
+  872  raspivid -o - -t 0 -n | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554/}' :demux=h264
+  873  raspivid -o - -t 0 -n  -w 1920 -h 1080 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554/}' :demux=h264
+  874  raspivid -o - -t 0 -n -hf -vf -w 1920 -h 1080 | cvlc -vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:8554/}' :demux=h264
+  875  raspivid -o - -t 0 -n -hf -vf -w 1920 -h 1080 | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8160}' :demux=h264
+  876  sudo shutdown -h now
+  877  htop
+  878  raspivid -o - -t 0 -n -hf -vf -w 1920 -h 1080 | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8160}' :demux=h264
+  879  sudo shutdown -h now
+  880  mc
+  881  cd workspace-ros/
+  882  ll
+  883  cd catkin_ws/
+  884  ll
+  885  cd src/
+  886  ll
+  887  cd uollibot_base/
+  888  ll
+  889  cd scripts/
+  890  ll
+  891  chmod +x camera.sh
+  892  ./camera
+  893  ./camera.sh
+  894  mc
+  895  rosrun uollibot_base camera.sh
+  896  roslaunch uollibot_base start_base.launch
+  897  mc
+  898  roslaunch uollibot_base start_base.launch
+  899  sudo shutdown -h now
+  900  htop
+  901  python
+  902  python3
+  903  sudo raspi-config
+  904  sudo reboot
+  905  python
+  906  sudo apt-get install device-tree-compiler
+  907  sudo i2cdetect -y 1
+  908  sudo raspi-config
+  909  sudo reboot
+  910  sudo i2cdetect -y 1
+  911  python
+  912  sudo apt-get install sense-hat
+  913  sudo i2cdetect -y 1
+  914  sudo i2cdetect -y 0
+  915  ll
+  916  df
+  917  cd /boot
+  918  ll
+  919  sudo nano config.txt
+  920  ll overlays/
+  921  sudo reboot
+  922  sudo i2cdetect -y 0
+  923  sudo i2cdetect -y 1
+  924  python
+  925  cd /boot
+  926  sudo nano config.txt
+  927  sudo reboot
+  928  dmesg
+  929  dmesg | grep sense
+  930  modprobe i2c-dev
+  931  sudo i2cdetect -y 1
+  932  sudo shutdown -h now
+  933  sudo i2cdetect -y 1
+  934  python3
+  935  sudo shutdown -h now
+  936  sudo i2cdetect -y 1
+  937  sudo shutdown -h now
+  938  sudo i2cdetect -y 1
+  939  sudo shutdown -h now
+  940  sudo i2cdetect -y 1
+  941  sudo shutdown -h now
+  942  python3
+  943  sudo shutdown -h now
+  944  python3
+  945  sudo i2cdetect -y 1
+  946  sudo i2cdetect -y 0
+  947  python3
+  948  pip list
+  949  pip --version
+  950  pip3 --version
+  951  history
+  952  sudo -H pip search ipython
+  953  ll
+  954  source ~/workspace-ros/devel/setup.bash
+  955  pip search ipython
+  956  pip --version
+  957  pip3 --version
+  958  sudo apt-get install python3-pip
+  959  pip3
+  960  auso pip3 --version
+  961  sudo pip3 --version
+  962  sudo -H pip3 -vvv install ipython
+  963  ipython
+  964  sudo shutdown -h now
+  965  ll
+  966  cd workspace
+  967  ll
+  968  cd ..
+  969  cd workspace-ros/
+  970  ll
+  971  cd catkin_ws/
+  972  ll
+  973  catkin_make
+  974  cd src
+  975  ll
+  976  cd ..
+  977  ll
+  978  ll src/
+  979  mc
+  980  ll
+  981  catkin_make
+  982  rospackage
+  983  rospack
+  984  rospack find uollibot_base
+  985  ll
+  986  cd src/
+  987  ll
+  988  cd uollibot_base/
+  989  ll
+  990  cd ..
+  991  catkin_make
+  992  ll
+  993  cd src/
+  994  ll
+  995  git clone https://github.com/mirkodcomparetti/ros_sensehat.git
+  996  ll
+  997  cd ..
+  998  ll
+  999  catkin_make
+ 1000  catkin_make install
+ 1001  rospack find ros_sensehat
+ 1002  roscd ros_sensehat
+ 1003  ll
+ 1004  rosrun ros_sensehat hat_publisher.py
+ 1005  exit
+ 1006  rosrun ros_sensehat hat_publisher.py
+ 1007  roscd ros_sensehat
+ 1008  ll
+ 1009  rosrun ros_sensehat hat_publisher.py
+ 1010  ipython
+ 1011  nano ~/.bashrc
+ 1012  source $HOME/workspace-ros/catkin_ws/devel/setup.bash
+ 1013  ipython
+ 1014  rosrun ros_sensehat hat_publisher.py
+ 1015  mc
+ 1016  roslaunch uollibot_base start_base.launch
+ 1017  mc
+ 1018  roslaunch uollibot_base start_base.launch
+ 1019  mc
+ 1020  roslaunch uollibot_base start_base.launch
+ 1021  sudo apt update
+ 1022  sudo apt upgrade
+ 1023  roslaunch uollibot_base start_base.launch
+ 1024  history
+ 1025  source $HOME/workspace-ros/catkin_ws/devel/setup.bash
+ 1026  roslaunch uollibot_base start_base.launch
+ 1027  nano ~/.bashrc
+ 1028  sudo shutdown -h now
+ 1029  df
+ 1030  history
+ 1031  ipython
+ 1032  roslaunch uollibot_base start_base.launch
+ 1033  sudo shutdown -h now
+ 1034  roscore
+ 1035  roslaunch uollibot_base start_base.launch
+ 1036  sudo shutdown -h now
+ 1037  roslaunch uollibot_base start_base.launch
+ 1038  sudo shutdown -h now
+ 1039  roslaunch uollibot_base start_base.launch
+ 1040  sudo shutdown -h now
+ 1041  df
+ 1042  df -h
+ 1043  sudo shutdown -h now
+ 1044  ll
+ 1045  more video.sh
+ 1046  history
+ 1047  roslaunch uollibot_base start_base.launch
+ 1048  sudo shutdown -h now
+ 1049  sudo apt update
+ 1050  apt list --upgradable
+ 1051  sudo apt upgrade
+ 1052  roslaunch uollibot_base start_base.launch
+ 1053  sudo shutdown -h now
+ 1054  sudo apt update
+ 1055  roslaunch uollibot_base start_base.launch
+ 1056  mc
+ 1057  roslaunch uollibot_base start_base.launch
+ 1058  sudo shutdown -h now
+ 1059  roslaunch uollibot_base start_base.launch
+ 1060  sudo shutdown -h now
+ 1061  ll /dev/tty*
+ 1062  gpsmon
+ 1063  cgps -s
+ 1064  service gpsd status
+ 1065  service gpsd stop
+ 1066  service gpsd status
+ 1067  gpsd -D 5 -N -n /dev/ttyUSB0
+ 1068  ll /dev/tty*
+ 1069  stty -F /dev/ttyACM1 ispeed 9600 && cat </dev/ttyACM1
+ 1070  stty -F /dev/ttyACM1 ispeed 9600 && cat </dev/ttyACM0
+ 1071  sudo  nano /etc/default/gpsd
+ 1072  gpsd -D 5 -N -n /dev/ttyACM0
+ 1073  service gpsd status
+ 1074  service gpsd start
+ 1075  service gpsd status
+ 1076  roslaunch uollibot_base start_base.launch
+ 1077  $GPTXT,01,01,01,NMEA unknown msg*58
+ 1078  mc
+ 1079  roslaunch uollibot_base start_base.launch
+ 1080  roslaunch uollibot_base start_base.launch
+ 1081  roscore
+ 1082  sudo reboot
+ 1083  gpsmon
+ 1084  roslaunch uollibot_base start_base.launch
+ 1085  sudo shutdown -h now
+ 1086  gpsmon
+ 1087  man gpsmon
+ 1088  gpsmon
+ 1089  cd
+ 1090  ll
+ 1091  cd workspace-ros/
+ 1092  ll
+ 1093  cd catkin_ws/src/
+ 1094  ll
+ 1095  cd uollibot_base/
+ 1096  ll
+ 1097  nano launch/
+ 1098  cd launch/
+ 1099  ll
+ 1100  nano start_base.launch
+ 1101  cd ..
+ 1102  ll
+ 1103  ll scripts/
+ 1104  cd scripts/
+ 1105  nano senseHatNode.py
+ 1106  nano /usr/lib/python2.7/dist-packages/sense_hat/sense_hat.py
+ 1107  nano senseHatNode.py
+ 1108  from sense_hat import SenseHat
+ 1109  python
+ 1110  mc
+ 1111  nano senseHatNode.py
+ 1112  fg
+ 1113  gpsmon
+ 1114  nano /etc/default/gpsd
+ 1115  nano senseHatNode.py
+ 1116  pip list
+ 1117  sudo apt update
+ 1118  exit
+ 1119  roslaunch uollibot_base start_base.launch
+ 1120  cd workspace-ros/
+ 1121  ll
+ 1122  cd catkin_ws/
+ 1123  catkin_make install
+ 1124  roslaunch uollibot_base start_base.launch
+ 1125  sudo shutdown -h now
+ 1126  roslaunch uollibot_base start_base.launch
+ 1127  hostname -I
+ 1128  sudo nano /etc/hosts
+ 1129  roslaunch uollibot_base start_base.launch
+ 1130  sudo reboot
+ 1131  roslaunch uollibot_base start_base.launch
+ 1132  sudo shutdown -h now
+ 1133  gpsmon
+ 1134  cgps -s
+ 1135  xgps
+ 1136  gpsmon
+ 1137  sudo apt update
+ 1138  sudo apt upgrade
+ 1139  sudo apt remove scratch2
+ 1140  sudo apt autoremove
+ 1141  gpsmon
+ 1142  sudo shutdown -h now
+ 1143  ip a
+ 1144  df
+ 1145  sudo apt update
+ 1146  nmcli
+ 1147  sudo raspi-config
+ 1148  sudo iwlist wlan0 scan
+ 1149  ip a
+ 1150  sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+ 1151  sudo apt update
+ 1152  sudo raspi-config
+ 1153  sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com F42ED6FBAB17C654
+ 1154  sudo apt update
+ 1155  sudo apt upgrade
+ 1156  df
+ 1157  more ~/.bashrc
+ 1158  sudo apt upgrade
+ 1159  df
+ 1160  sudo reboot
+ 1161  ip a
+ 1162  exit
+ 1163  ll
+ 1164  ll workspace
+ 1165  ll workspace-ros/
+ 1166  mc
+ 1167  exit
+ 1168  sudo shutdown -h now
+ 1169  df
+ 1170  history
+pi@rosrobot:~ $
+

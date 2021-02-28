@@ -1,0 +1,10 @@
+#
+#
+# ros
+source /opt/ros/kinetic/setup.bash
+export ROS_HOSTNAME=192.168.147.85
+export ROS_MASTER_URI=http://192.168.147.85:11311
+# ros custom nodes
+source $HOME/workspace-ros/catkin_ws/devel/setup.bash
+#
+export ROS_PACKAGE_PATH=$HOME/workspace-ros/catkin_ws:${ROS_PACKAGE_PATH}

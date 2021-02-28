@@ -1,0 +1,321 @@
+28.8.2018
+---------
+
+INSTALL KINETIC KAME:
+installare python anaconda 2.7
+#
+conda create -n ros-env python=2.7
+conda activate ros-env
+- oppure:
+source activate ros-env
+#
+sites: 
+  http://wiki.ros.org/kinetic/Installation/Ubuntu
+
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+sudo apt update
+sudo apt install ros-kinetic-desktop-full
+sudo apt install ros-kinetic-moveit
+
+inoltre:
+pip install rospkg
+pip install defusedxml
+pip install pyyaml
+
+sudo apt install ros-kinetic-joystick-drivers
+sudo apt install ros-kinetic-rosserial
+sudo apt install ros-kinetic-rosserial-arduino
+sudo apt install ros-kinetic-husky-simulator
+sudo apt install ros-kinetic-turtlebot3*
+sudo apt install ros-kinetic-ros-controllers  <--- diff drive
+sudo apt install ros-kinetic-ros-control      <---
+sudo apt install ros-kinetic-rqt-controller-manager
+sudo apt install ros-kinetic-gpsd-client
+sudo apt install ros-kinetic-gps-umd
+sudo apt install ros-kinetic-robot-upstart   <---------- at boot
+
+Attenzione tra python2 e python3. 
+USARE SOLO PYTHON 2.7
+
+NETWORK CONFIGURATIONS:
+http://wiki.ros.org/ROS/NetworkSetup
+CLEANFLIGHT-CONFIGURATOR:
+cd ~/drone-tools/software/cleanflight-configurator
+git reset --hard
+git pull
+npm start
+/home/antonio/drone-tools/software/cleanflight-configurator/debug/cleanflight-configurator/linux64/cleanflight-configurator
+
+
+EXTRA:
+pip install rosinstall
+sudo apt install ros-kinetic-joy ros-kinetic-teleop-twist-joy ros-kinetic-teleop-twist-keyboard ros-kinetic-laser-proc ros-kinetic-rgbd-launch ros-kinetic-depthimage-to-laserscan ros-kinetic-rosserial-arduino ros-kinetic-rosserial-python ros-kinetic-rosserial-server ros-kinetic-rosserial-client ros-kinetic-rosserial-msgs ros-kinetic-amcl ros-kinetic-map-server ros-kinetic-move-base ros-kinetic-urdf ros-kinetic-xacro ros-kinetic-compressed-image-transport ros-kinetic-rqt-image-view ros-kinetic-gmapping ros-kinetic-navigation ros-kinetic-interactive-markers
+sites: https://github.com/ros/genmsg/issues/63
+pip uninstall em
+pip install empy
+sites: https://stackoverflow.com/questions/36190757/numpy-undefined-symbol-pyfpe-jbuf
+pip uninstall numpy
+conda install numpy
+conda install pyqt <--- importante
+
+ROS_LIB ARDUINO:
+conda activate ros-env
+cd /home/antonio/Arduino/libraries
+rosrun rosserial_arduino make_libraries.py  /home/antonio/Arduino/libraries
+sites:
+https://answers.ros.org/question/96811/rosnode_handleh-no-such-file-error-in-arduino-hellow-world-tutorial/
+http://wiki.ros.org/rosserial_arduino/Tutorials/Arduino%20IDE%20Setup
+
+MSP PROTOCOL CLEANFLIGHT:
+https://github.com/alduxvm/pyMultiWii
+http://www.multiwii.com/wiki/index.php?title=Multiwii_Serial_Protocol
+
+URDF CHECKER UPDATED:
+check_urdf urdf/robot1.urdf
+
+PER RASPBERRY SEGUIRE:
+va compilato a mano
+http://wiki.ros.org/ROSberryPi/Installing%20ROS%20Kinetic%20on%20the%20Raspberry%20Pi
+
+DA PROVE CON ROSERIAL ARDUINO FARE ANCHE:
+pip install netifaces
+
+15.10.2018
+----------
+
+avvio con roslaunch in ambiente PC:
+conda activate ros-env					<-- attivazione amiente python3
+rospack list-names					<-- lista packages visibili
+roscd uollibot_base					<-- directory base del paccketto
+roslaunch uollibot_base start_base.launch		<-- lancio applicativo in seriale + roscore in automatico
+
+avvio con roslaunch in ambiente RPI via wlan0 (wifi):
+con /etc/hosts contenente:
+rosrobot	192.168.147.85
+export ROS_HOSTNAME=rosrobot
+export ROS_MASTER_URI=http://rosrobot:11311
+ssh pi@rosrobot
+roslaunch uollibot_base start_base.launch
+
+
+23.11.2018
+----------
+
+GPS su linux:
+cgps -s
+xgps
+gpsd -D 5 -N -n /dev/ttyUSB0
+sudo apt install xgps gpsd gpsd-clients
+service gpsd status
+service gpsd start
+service gpsd stop
+man gpsd
+gpsmon
+
+siti:
+https://github.com/swri-robotics/gps_umd
+https://learn.adafruit.com/adafruit-ultimate-gps-on-the-raspberry-pi/setting-everything-up
+https://github.com/wadda/gps3
+https://stackoverflow.com/questions/28882193/using-gps-library-in-python-3
+https://wiki.ubuntu-it.org/Hardware/DispositiviSenzaFili/GPS
+http://www.catb.org/gpsd/installation.html
+https://manurevah.com/blah/en/p/gps-on-linux
+
+seguire per l'installazione:
+http://www.catb.org/gpsd/installation.html
+porte disponibili:
+/dev/ttyACM0  GPS @ USB RPI <--- OK con 9600 fare: stty -F /dev/ttyACM1 ispeed 9600 && cat </dev/ttyACM1
+/dev/ttyACM1  BASE IO BOARD @ USB RPI < arduino due programming port
+/dev/ttyAMA0
+/dev/ttyUSB0  NAZE BOARD @ USB RPI
+
+la configurazione:
+/etc/default/gpsd
+/lib/systemd/system/gpsd.service
+
+PER INSTALLARE IN ROS RASPBERRY IL NODO GPS:
+SEGUIRE:
+http://wiki.ros.org/ROSberryPi/Installing%20ROS%20Kinetic%20on%20the%20Raspberry%20Pi
+FARE:
+cd ~/catkin_ws
+rosinstall_generator gps_umd --rosdistro kinetic --deps --wet-only --tar > kinetic-custom_ros.rosinstall
+
+IN REMOTO FARE:
+rostopic list
+rostopic echo /fix <-- uscita gps
+
+ROBOT LOCALIZAZION SENSOR FUSION:
+sudo apt install libeigen3-dev libyaml-cpp-dev
+SEGUIRE:
+http://docs.ros.org/kinetic/api/robot_localization/html/index.html
+FARE:
+sudo apt install ros-kinetic-robot-localization <-- su x86_64
+altrimenti ricompilare su ARM
+FARE IN ARM RPI:
+cd ~/workspace-ros/catkin_ws
+https://github.com/clearpathrobotics/robot_upstart.git
+wstool merge -t src kinetic-custom_ros.rosinstall
+wstool update -t src
+rosdep install -y --from-paths src --ignore-src --rosdistro kinetic -r --os=debian:stretch
+sudo ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/kinetic -j1
+
+
+---https://github.com/clearpathrobotics/robot_upstart.git
+
+-----------------------------------------------------------------------------------------------------------------------
+
+2.11.2018
+---------
+
+PIANO B PER INSTALLARE robot_upstart o altro package IN-TREE:
+rosinstall_generator robot_upstart --rosdistro kinetic --deps --wet-only --tar > kinetic-robot_upstart-wet.rosinstall
+wstool merge -t src kinetic-custom_ros.rosinstall
+wstool merge -t src kinetic-robot_upstart-wet.rosinstall
+wstool merge -t src kinetic-ros_comm-wet.rosinstall
+wstool update -t src
+rosdep install -y --from-paths src --ignore-src --rosdistro kinetic -r --os=debian:stretch
+sudo ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release --install-space /opt/ros/kinetic -j1
+-----------------------------------------------------------------------------------------------------------------------
+CLEANFLIGH NAZE 32 MAGNETOMETER:
+https://github.com/cleanflight/cleanflight/blob/master/docs/development/Building%20in%20Ubuntu.md
+https://horaciobouzas.com/
+
+
+CLEANFLIGHT-CONFIGURATOR BATTERY SENSOR:
+impostare scala=67, divisore=1, moltiplicatore=4
+tens minima di cella=3V3
+tens massima di cella=4V3
+tens avviso=3V5
+
+python library:
+https://github.com/ke4ukz/PyMSP/wiki
+
+RPI SENSE HAT:
+https://pythonhosted.org/sense-hat/
+
+
+ROS PY TREE:
+sudo apt install ros-kinetic-py-trees
+sites:
+https://py-trees.readthedocs.io/en/devel/behaviours.html
+http://docs.ros.org/kinetic/api/py_trees_ros/html/about.html
+
+ROS UPSTART:
+https://github.com/clearpathrobotics/robot_upstart
+http://docs.ros.org/jade/api/robot_upstart/html/
+fare:
+rosrun robot_upstart install uollibot_base/launch/start_base.launch
+
+sudo apt-get install ros-kinetic-rqt
+
+TENERE AGGIORNATO IL PYTHONPATH:
+https://github.com/clearpathrobotics/robot_upstart/issues/32
+
+PICAM:
+https://picamera.readthedocs.io/en/release-1.10/recipes1.html
+raspivid -o - -t 0 -n -hf -vf -w 1920 -h 1080 | cvlc -vvv stream:///dev/stdin --sout '#standard{access=http,mux=ts,dst=:8160}' :demux=h264
+
+
+BLUE DOT:
+telecomando raspberry da app cellulare
+
+13.12.2018
+----------
+ros_sensehat installato
+
+14.12.2018
+----------
+MONIT MONITOR LINUX:
+sudo apt install monit
+https://stackoverflow.com/questions/13175331/make-failure-installing-monit-on-linux-ec2
+https://mmonit.com/monit/documentation/monit.html#PAM
+https://fak3r.com/2010/04/10/howto-use-monit-to-monitor-sites-and-alert-users/
+https://exygy.com/automatically-restart-your-server-with-monit/
+
+IN /etc/monit/conf-enabled INSERIRE ping contenente:
+check host google address www.google.it
+if failed url http://www.google.it
+  with timeout 20 seconds for 5 cycles
+  then restart
+if 3 restarts within 5 cycles then timeout
+
+e fare:
+sudo monit -t
+sudo monit reload
+LA CONFIGURAZIONE E IN:
+sudo nano /etc/monit/monitrc
+IL LOG E IN:
+more /var/log/monit.log
+impostare 120 con un ritardo di 240
+
+31.12.2018
+----------
+
+JOYSTICK:
+sudo apt install ros-kinetic-joy
+e dopo le configurazioni in rosparam
+rosparam set joy_node/dev "/dev/input/js0"
+rosrun joy joy_node
+sul destinazione fare:
+rostopic echo /joy
+sul file /etc/hosts/ di tutti i nodi impostare i nomi simbolici
+
+
+3.12.2018
+---------
+
+
+1008  03/12/18 19:40:19 sudo apt install python-rosdep python-rosinstall-generator python-wstool python-rosinstall build-essential
+ 1009  03/12/18 19:40:42 pip install -U rosdep rosinstall_generator wstool rosinstall
+ 1010  03/12/18 19:41:02 pip install --upgrade setuptools
+ 1011  03/12/18 19:41:31 rosdep init
+ 1012  03/12/18 19:41:40 sudo rosdep init
+ 1013  03/12/18 19:42:04 more /etc/ros/rosdep/sources.list.d/20-default.list
+ 1014  03/12/18 19:42:40 sudo rm /etc/ros/rosdep/sources.list.d/20-default.list
+ 1015  03/12/18 19:42:49 sudo rosdep init
+ 1016  03/12/18 19:42:54 more /etc/ros/rosdep/sources.list.d/20-default.list
+ 1017  03/12/18 19:43:07 rosdep update
+ 1018  03/12/18 19:44:02 mkdir ~/ros_catkin_ws
+ 1019  03/12/18 19:44:11 cd ~/ros_catkin_ws
+ 1020  03/12/18 19:44:12 ll
+ 1021  03/12/18 19:44:33 rosinstall_generator desktop_full --rosdistro kinetic --deps --wet-only --tar > kinetic-desktop-full-wet.rosinstall
+ 1022  03/12/18 19:44:52 ll
+ 1023  03/12/18 19:44:57 more kinetic-desktop-full-wet.rosinstall 
+ 1024  03/12/18 19:45:27 wstool init  src kinetic-desktop-full-wet.rosinstall
+ 1025  03/12/18 19:55:22 rosdep install --from-paths src --ignore-src --rosdistro kinetic -y
+ 1026  03/12/18 19:56:21 ./src/catkin/bin/catkin_make_isolated --install -DCMAKE_BUILD_TYPE=Release
+ 1027  03/12/18 19:57:33 wstool init  src kinetic-desktop-full-wet.rosinstall
+ 1028  03/12/18 19:57:37 ll
+ 1029  03/12/18 19:57:42 ll src/
+ 1030  03/12/18 19:58:20 rosdep install --from-paths src --ignore-src --rosdistro kinetic -y
+ 1031  03/12/18 19:59:36 ll /etc/ros/rosdep
+ 1032  03/12/18 19:59:50 ll /etc/ros
+ 1033  03/12/18 20:00:14 sudo rm -rf /etc/ros/rosdep
+ 1034  03/12/18 20:00:19 ll /etc/ros
+ 1035  03/12/18 20:00:33 sudo rosdep init
+ 1036  03/12/18 20:00:45 rosdep update
+ 1037  03/12/18 20:01:42 rosdep install --from-paths src --ignore-src --rosdistro kinetic -y
+ 1038  03/12/18 20:03:05 lsb_release -a
+ 1039  03/12/18 20:03:36 rosdep install --from-paths src --ignore-src --rosdistro=kinetic -y --os=ubuntu:xenial
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
