@@ -1,0 +1,125 @@
+#!/usr/bin/env python
+
+"""driver.py: MultiWii protocol interface """
+
+__author__ = "Antonio Sapuppo"
+__copyright__ = "Copyright 2018"
+
+__license__ = "GPL"
+__version__ = "1.0"
+__maintainer__ = "Antonio Sapuppo"
+__email__ = "a.sapuppo@youus.it"
+__status__ = "Development"
+
+import rospy
+import sensor_msgs.msg as sensor_msgs
+from sensor_msgs.msg import Imu
+from geometry_msgs.msg import Quaternion
+from std_msgs.msg import Float32, Int16MultiArray
+from MultiWii import MultiWii
+
+
+# start:
+# conda activate ros-env
+# roscore
+# usage:
+# rosrun uollibot_base driver
+# ---------------------------------------------------------------------
+
+
+if __name__ == '__main__':
+    # registering node in ros master
+    rospy.init_node('uollibot_base_naze', log_level=rospy.INFO)
+    # begin node code
+    rospy.loginfo('Starting uollibot_base_naze')
+    port = rospy.get_param("~port", "/dev/ttyUSB0")
+    baud = int(rospy.get_param("~baud", 115200))
+    #
+    battery = sensor_msgs.BatteryState()
+    batteryPub = rospy.Publisher("batteryState", sensor_msgs.BatteryState, queue_size=10)
+    rawPitchPub = rospy.Publisher("rawPitch", Float32, queue_size=10)
+    rawRollPub = rospy.Publisher("rawRoll", Float32, queue_size=10)
+    rawYawPub = rospy.Publisher("rawYaw", Float32, queue_size=10)
+    rawAltitudePub = rospy.Publisher("rawAltitude", Float32, queue_size=10)
+    rawVariometerPub = rospy.Publisher("rawVariometer", Float32, queue_size=10)
+    rawImuPub = rospy.Publisher("rawImu", Int16MultiArray, queue_size=10)
+
+    board = MultiWii()
+    board.connect(portName=port, baudRate=baud)
+    rateHz = 10
+    rate = rospy.Rate(rateHz)  # hz
+    rospy.loginfo('Started uollibot_base_naze at {} Hz'.format(rateHz))
+    try:
+        tick = 0
+        while not rospy.is_shutdown():
+            tick = tick + 1
+            if tick == rateHz:
+                tick = 0
+                # get battery more slowly
+                response = board.getAnalog()
+                battery.voltage = response['vbat']
+                battery.current = -response['amperage']
+                battery.design_capacity = 2200 # mAh
+                battery.present = True
+                power_supply_technology = sensor_msgs.BatteryState.POWER_SUPPLY_TECHNOLOGY_LIPO
+                battery.location= "slot-a"
+                battery.serial_number = "2016"
+                #
+                #powermetersum = response['powermetersum']
+                #message = "V = {:+.2f} \t A = {:+.2f} \t"\
+                #    .format(float(battery.voltage),
+                #            float(battery.current))
+                #rospy.loginfo(message)
+                #
+                batteryPub.publish(battery)
+                #
+
+            response = board.getAttitude()
+            rawPitch = float(response['angx'])
+            rawRoll = float(response['angy'])
+            rawYaw = float(response['heading'])
+            #
+            #message = "pitch = {:+.2f} \t roll = {:+.2f} \t yaw = {:+.2f} \t"\
+            #   .format(rawPitch, rawRoll, rawYaw)
+            # pitch + if forward down
+            # roll  + if left down
+            # yaw is north heading
+            #rospy.loginfo(message)
+            #
+            rawPitchPub.publish(rawPitch)
+            rawRollPub.publish(rawRoll)
+            rawYawPub.publish(rawYaw)
+            #
+            response = board.getAltitude()
+            rawAltitude = float(response['altitude'])
+            rawVariometer = float(response['vari'])
+            #
+            #message = "altitude = {:+.2f} \t vari = {:+.2f} \t" \
+            #    .format(rawAltitude, rawVariometer)
+            #rospy.loginfo(message)
+            #
+            rawAltitudePub.publish(rawAltitude)
+            rawVariometerPub.publish(rawVariometer)
+            #
+            response = board.getIMU()
+            rawAccx = int(response['accx'])
+            rawAccy = int(response['accy'])
+            rawAccz = int(response['accz'])
+            rawGyrx = int(response['gyrx'])
+            rawGyry = int(response['gyry'])
+            rawGyrz = int(response['gyrz'])
+            rawMagx = int(response['magx'])
+            rawMagy = int(response['magy'])
+            rawMagz = int(response['magz'])
+            rawImu = Int16MultiArray(data=[rawAccx, rawAccy, rawAccz,
+                                           rawGyrx, rawGyry, rawGyrz,
+                                           rawMagx, rawMagy, rawMagz])
+            rawImuPub.publish(rawImu)
+            #
+            rate.sleep()
+    except Exception,error:
+        rospy.logerr("Error on Main: "+str(error))
+    except rospy.ROSInterruptException:
+        board.disconnect()
+        rospy.loginfo("Shutdown battery manager")
+
