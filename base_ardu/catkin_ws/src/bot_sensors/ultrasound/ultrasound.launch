@@ -1,7 +1,0 @@
-<launch>
-    <node name="ultrasound" pkg="bot_sensors" type="ultrasound.py" output="screen">
-      <param name="GPIO_PIN_SIG" type="int" value="7" />
-      <param name="PUBLISH_RATE" type="int" value="10" />
-      <param name="TOPIC_NAME" type="str" value="bot_sensors_ultrasound" />
-    </node>
-</launch>
