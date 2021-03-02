@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # original from github
 # revisions antonio s:
@@ -21,22 +21,22 @@ def pix_next_color(colorarray):
     r = colorarray[0]
     g = colorarray[1]
     b = colorarray[2]
-    if (r == 255 and g < 255 and b == 0):
+    if r == 255 and g < 255 and b == 0:
         g += 1
 
-    if (g == 255 and r > 0 and b == 0):
+    if g == 255 and r > 0 and b == 0:
         r -= 1
 
-    if (g == 255 and b < 255 and r == 0):
+    if g == 255 and b < 255 and r == 0:
         b += 1
 
-    if (b == 255 and g > 0 and r == 0):
+    if b == 255 and g > 0 and r == 0:
         g -= 1
 
-    if (b == 255 and r < 255 and g == 0):
+    if b == 255 and r < 255 and g == 0:
         r += 1
 
-    if (r == 255 and b > 0 and g == 0):
+    if r == 255 and b > 0 and g == 0:
         b -= 1
 
     colorarray[0] = r
@@ -87,7 +87,7 @@ def get_gyroscope(sense):
 
 def get_stick(sense):
     stickEvents = sense.stick.get_events()
-    if (len(stickEvents) > 0):
+    if len(stickEvents) > 0:
         return stickEvents[-1]
     else:
         return None
