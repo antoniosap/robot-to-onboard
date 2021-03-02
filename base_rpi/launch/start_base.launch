@@ -11,7 +11,7 @@
     <param name="_host" value="localhost"/>
   </node>
 
-  <node name="base_camera" pkg="uollibot_base" type="camera.sh" output="screen"/>
-  <node name="base_sensehat" pkg="uollibot_base" type="senseHatNode.py" output="screen"/>
+  <node name="base_camera" pkg="base_rpi" type="camera.sh" output="screen"/>
+  <node name="base_sensehat" pkg="base_rpi" type="senseHatNode.py" output="screen"/>
  
 </launch>
