@@ -168,7 +168,7 @@ if __name__ == '__main__':
             pubCompass.publish(get_compass(sense))
 
             stickEvent = get_stick(sense)
-            if (stickEvent is not None):
+            if stickEvent is not None:
                 pubStick.publish(stickEvent.direction)
 
             rate.sleep()
