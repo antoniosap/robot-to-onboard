@@ -1,3 +1,47 @@
+3.3.2021
+--------
+
+pi@rosrobot:~ $ rostopic list -v
+
+Published topics:
+ * /rosout [rosgraph_msgs/Log] 3 publishers
+ * /rosout_agg [rosgraph_msgs/Log] 1 publisher
+ * /extended_fix [gps_common/GPSFix] 1 publisher
+ * /fix [sensor_msgs/NavSatFix] 1 publisher
+ * /diagnostics [diagnostic_msgs/DiagnosticArray] 1 publisher
+ * /sensehat/humidity [std_msgs/Float64] 1 publisher
+ * /sensehat/temperature [std_msgs/Float64] 1 publisher
+ * /sensehat/pressure [std_msgs/Float64] 1 publisher
+ * /sensehat/accelerometer [geometry_msgs/Vector3] 1 publisher
+ * /sensehat/gyroscope [geometry_msgs/Vector3] 1 publisher
+ * /sensehat/magnetometer [geometry_msgs/Vector3] 1 publisher
+ * /sensehat/compass [std_msgs/Float64] 1 publisher
+ * /sensehat/stick [std_msgs/String] 1 publisher
+ * /base/btn_shutdown [std_msgs/Bool] 1 publisher
+ * /base/btn_emergency [std_msgs/Bool] 1 publisher
+ * /base/pir_n [std_msgs/Bool] 1 publisher
+ * /base/pir_se [std_msgs/Bool] 1 publisher
+ * /base/pir_sw [std_msgs/Bool] 1 publisher
+ * /base/lwheel [std_msgs/Int16] 1 publisher
+ * /base/rwheel [std_msgs/Int16] 1 publisher
+
+Subscribed topics:
+ * /rosout [rosgraph_msgs/Log] 1 subscriber
+ * /sensehat/led_panel [std_msgs/String] 1 subscriber
+ * /base/wheel_lv [std_msgs/Int16] 1 subscriber
+ * /base/wheel_rv [std_msgs/Int16] 1 subscriber
+ * /base/status_led [std_msgs/Bool] 1 subscriber
+ * /base/cam_light_led [std_msgs/Bool] 1 subscriber
+ * /base/cam_ir_led [std_msgs/Bool] 1 subscriber
+ * /base/cam_pan [std_msgs/Int16] 1 subscriber
+ * /base/cam_tilt [std_msgs/Int16] 1 subscriber
+ * /base/buzzer [std_msgs/Bool] 1 subscriber
+ * /base/strip_led [std_msgs/ColorRGBA] 1 subscriber
+
+TEST:
+roswtf
+sites: https://wiki.ros.org/ROS/Troubleshooting
+
 28.8.2018
 ---------
 

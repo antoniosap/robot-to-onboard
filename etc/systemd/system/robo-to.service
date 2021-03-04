@@ -1,0 +1,13 @@
+[Unit]
+Description=robo-to on board service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/workspace-ros1/src/robot-to-onboard/base_rpi
+User=pi
+Group=pi
+ExecStart=/home/pi/workspace-ros1/src/robot-to-onboard/base_rpi/scripts/robo-to-start.sh
+# Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
