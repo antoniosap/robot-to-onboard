@@ -1,6 +1,9 @@
 3.3.2021
 --------
 
+TODO gps sistemare messaggi
+TODO sequenza shutdown dal pulsante
+
 pi@rosrobot:~ $ rostopic list -v
 
 Published topics:
@@ -45,6 +48,8 @@ sites: https://wiki.ros.org/ROS/Troubleshooting
 SERVICES:
 sudo systemctl daemon-reload
 sudo systemctl status robo-to.service
+sudo systemctl start robo-to.service
+sudo systemctl stop robo-to.service
 sudo systemctl enable robo-to.service
 sudo systemctl disable robo-to.service
 
