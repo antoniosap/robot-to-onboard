@@ -1,8 +1,11 @@
 3.3.2021
 --------
 
-TODO gps sistemare messaggi
+TODO gps ritardare avvio
 TODO sequenza shutdown dal pulsante
+
+NFS SHARE:
+sudo mount -vvvv rosrobot:/home/pi/workspace-ros1/src/robot-to-onboard   /home/aldebaran/workspace-ros1/src/robot-to-onboard/nfs_share
 
 pi@rosrobot:~ $ rostopic list -v
 

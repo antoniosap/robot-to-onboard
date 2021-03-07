@@ -32,11 +32,11 @@ def btn_shutdown(data):
 
 
 if __name__ == '__main__':
-    node_name = 'base_rpi'
+    node_name = rospy.get_caller_id()
     # registering node in ros master
     rospy.init_node(node_name, log_level=rospy.INFO)
     # begin node code
-    rospy.loginfo(f'Starting {node_name}')
+    rospy.loginfo(f'{node_name} Starting ')
     #
     rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
     rate = rospy.Rate(1)  # hz
@@ -45,6 +45,6 @@ if __name__ == '__main__':
 
             rate.sleep()
     except Exception as error:
-        rospy.logerr(f'Error on Main: {error}')
+        rospy.logerr(f'{node_name} Error on Main: {error}')
     except rospy.ROSInterruptException:
-        rospy.loginfo(f'Shutdown {node_name}')
+        rospy.loginfo(f'{node_name} Shutdown')
