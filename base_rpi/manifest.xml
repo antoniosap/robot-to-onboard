@@ -1,13 +1,13 @@
 <package>
-  <description brief="uollibot_base">
+  <description brief="rpi_base">
 
-     uollibot_base
+     rpi_base
 
   </description>
   <author>pi</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/uollibot_base</url>
+  <url>http://ros.org/wiki/rpi_base</url>
 
 </package>
 

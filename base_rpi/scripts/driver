@@ -8,7 +8,7 @@ __copyright__ = "Copyright 2018"
 __license__ = "GPL"
 __version__ = "1.0"
 __maintainer__ = "Antonio Sapuppo"
-__email__ = "a.sapuppo@youus.it"
+__email__ = "antoniosapuppo@yahoo.it"
 __status__ = "Development"
 
 import rospy

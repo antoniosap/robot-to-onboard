@@ -8,7 +8,7 @@ __copyright__ = "Copyright 2018"
 __license__ = "GPL"
 __version__ = "1.0"
 __maintainer__ = "Antonio Sapuppo"
-__email__ = "a.sapuppo@youus.it"
+__email__ = "antoniosapuppo@yahoo.it"
 __status__ = "Development"
 
 import rospy
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             rawImuPub.publish(rawImu)
             #
             rate.sleep()
-    except Exception,error:
+    except Exception as error:
         rospy.logerr("Error on Main: "+str(error))
     except rospy.ROSInterruptException:
         board.disconnect()
