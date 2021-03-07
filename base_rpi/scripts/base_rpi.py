@@ -11,15 +11,22 @@ __maintainer__ = "Antonio Sapuppo"
 __email__ = "antoniosapuppo@yahoo.it"
 __status__ = "Development"
 
+import os
 import rospy
 import sensor_msgs.msg as sensor_msgs
 from std_msgs.msg import Bool
 
 # ---------------------------------------------------------------------
+# sites info:
+# https://askubuntu.com/questions/168879/shutdown-from-terminal-without-entering-password
+# https://github.com/halofx/rpi-shutdown/blob/master/shutdown.py
+#
 
 
 def btn_shutdown(data):
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
+    if data.data == 'True':
+        rospy.loginfo(rospy.get_caller_id() + " shutdown request")
+        os.system("sudo shutdown -h now")
 
 
 if __name__ == '__main__':
