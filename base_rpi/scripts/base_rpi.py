@@ -21,13 +21,12 @@ from std_msgs.msg import Bool
 # https://askubuntu.com/questions/168879/shutdown-from-terminal-without-entering-password
 # https://github.com/halofx/rpi-shutdown/blob/master/shutdown.py
 #
-#
 
 
 def btn_shutdown(data):
-    rospy.loginfo(rospy.get_caller_id() + " shutdown button ", data.data)
+    rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
     if data.data == 'True':
-        rospy.loginfo(rospy.get_caller_id() + " shutdown request")
+        rospy.loginfo(f'{rospy.get_caller_id()} shutdown request')
         os.system("sudo shutdown -h now")
 
 
@@ -45,6 +44,6 @@ if __name__ == '__main__':
 
             rate.sleep()
     except Exception as error:
-        rospy.logerr("Error on Main: "+str(error))
+        rospy.logerr(f'Error on Main: {error}')
     except rospy.ROSInterruptException:
         rospy.loginfo(f'Shutdown {node_name}')
