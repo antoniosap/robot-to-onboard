@@ -24,6 +24,7 @@ from std_msgs.msg import Bool
 
 
 def btn_shutdown(data):
+    rospy.loginfo(rospy.get_caller_id() + " shutdown button ", data.data)
     if data.data == 'True':
         rospy.loginfo(rospy.get_caller_id() + " shutdown request")
         os.system("sudo shutdown -h now")
