@@ -129,15 +129,17 @@ def sensorsDataToVector3(data):
 # info sites:
 # https://pymotw.com/2/threading/
 
-def cbLedPanel(msg):
-    senseCb = SenseHat()
-    senseCb.set_rotation(90)
+
+def sense_hat_panel(msg):
+    sense_hat = SenseHat()
+    sense_hat.set_rotation(270)
     if len(msg.data) > 0:
-       senseCb.show_message(sense.show_message(msg.data))
+        sense_hat.show_message(msg.data)
 
 
 if __name__ == '__main__':
-    sense = SenseHat()
+    sense_hat = SenseHat()
+    sense_hat.set_rotation(270)
     rosFrequency = 10
     rosNodeName = "sensehat"
     rospy.init_node(rosNodeName, log_level=rospy.INFO)
@@ -153,21 +155,22 @@ if __name__ == '__main__':
     pubCompass = rospy.Publisher('sensehat/compass', Float64, queue_size=10)
     pubStick = rospy.Publisher('sensehat/stick', String, queue_size=10)
     # listeners
-    rospy.Subscriber("sensehat/led_panel", String, cbLedPanel, queue_size=10)
+    rospy.Subscriber("sensehat/led_panel", String, sense_hat_panel, queue_size=10)
     #
     try:
+        sense_hat.show_message('Starting')
         rospy.loginfo(rospy.get_caller_id() + " Starting")
         while not rospy.is_shutdown():
-            pubHumidity.publish(get_humidity(sense))
-            pubTemperature.publish(get_temperature(sense))
-            pubPressure.publish(get_pressure(sense))
+            pubHumidity.publish(get_humidity(sense_hat))
+            pubTemperature.publish(get_temperature(sense_hat))
+            pubPressure.publish(get_pressure(sense_hat))
 
-            pubAccelerometer.publish(sensorsDataToVector3(get_accelerometer(sense)))
-            pubGyroscope.publish(sensorsDataToVector3(get_gyroscope(sense)))
-            pubMagnetometer.publish(sensorsDataToVector3(get_magnetometer(sense)))
-            pubCompass.publish(get_compass(sense))
+            pubAccelerometer.publish(sensorsDataToVector3(get_accelerometer(sense_hat)))
+            pubGyroscope.publish(sensorsDataToVector3(get_gyroscope(sense_hat)))
+            pubMagnetometer.publish(sensorsDataToVector3(get_magnetometer(sense_hat)))
+            pubCompass.publish(get_compass(sense_hat))
 
-            stickEvent = get_stick(sense)
+            stickEvent = get_stick(sense_hat)
             if stickEvent is not None:
                 pubStick.publish(stickEvent.direction)
 

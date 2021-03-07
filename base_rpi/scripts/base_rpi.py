@@ -14,7 +14,7 @@ __status__ = "Development"
 import os
 import rospy
 import sensor_msgs.msg as sensor_msgs
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 
 # ---------------------------------------------------------------------
 # sites info:
@@ -27,8 +27,13 @@ def btn_shutdown(data):
     rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
     status = str(data.data) == 'True'
     if status:
-        rospy.loginfo(f'{rospy.get_caller_id()} shutdown request')
-        os.system("sudo shutdown -h now")
+        msg = 'shutdown in progress'
+        rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
+        pub_display8x8 = rospy.Publisher('sensehat/led_panel', String, queue_size=10)
+        pub_display8x8.publish(msg)
+        pub_cam_light_led = rospy.Publisher('/base/cam_light_led', Bool, queue_size=10)
+        pub_cam_light_led.publish(False)
+        os.system("sudo shutdown -h 1")
 
 
 if __name__ == '__main__':
@@ -39,6 +44,9 @@ if __name__ == '__main__':
     rospy.loginfo(f'Starting {node_name}')
     #
     rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
+    #
+    pub_display8x8 = rospy.Publisher('sensehat/led_panel', String, queue_size=10)
+    #
     rate = rospy.Rate(1)  # hz
     try:
         while not rospy.is_shutdown():
