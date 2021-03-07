@@ -21,6 +21,7 @@ from std_msgs.msg import Bool
 # https://askubuntu.com/questions/168879/shutdown-from-terminal-without-entering-password
 # https://github.com/halofx/rpi-shutdown/blob/master/shutdown.py
 #
+#
 
 
 def btn_shutdown(data):
