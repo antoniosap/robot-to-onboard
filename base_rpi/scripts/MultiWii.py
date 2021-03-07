@@ -18,6 +18,7 @@ from threading import Thread, Event
 from time import sleep, time
 import struct
 
+
 class MultiWii(object):
 	"""Connect to and communicate with an RC device using the MultiWii Serial Protocol
 	

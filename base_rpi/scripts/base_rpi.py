@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """ mobile base utils """
 
@@ -25,7 +25,7 @@ def btn_shutdown(data):
 if __name__ == '__main__':
     node_name = 'base_rpi'
     # registering node in ros master
-    rospy.init_node(node_name, log_level=rospy.DEBUG)
+    rospy.init_node(node_name, log_level=rospy.INFO)
     # begin node code
     rospy.loginfo(f'Starting {node_name}')
     #
