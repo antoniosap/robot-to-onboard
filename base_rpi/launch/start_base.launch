@@ -7,7 +7,10 @@
     <param name="tf_prefix" value="$(arg uolli_robot_name)"/>
   </node>
 
-  <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="navsat" respawn="false" output="screen">
+  <arg name="nmea_start_delay" default="10.0" />
+  <node pkg="nmea_navsat_driver" type="nmea_serial_driver" name="navsat"
+        launch-prefix="bash -c 'sleep $(arg nmea_start_delay); $0 $@' "
+        respawn="false" output="screen">
     <param name="port" value="/dev/ttyACM0"/>
     <param name="baud" value="9600"/>
   </node>
