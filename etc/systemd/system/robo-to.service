@@ -6,7 +6,7 @@ After=network.target
 WorkingDirectory=/home/pi/workspace-ros1/src/robot-to-onboard/base_rpi
 User=pi
 Group=pi
-ExecStart=/home/pi/workspace-ros1/src/robot-to-onboard/base_rpi/scripts/robo-to-start.sh
+ExecStart=/home/pi/workspace-ros1/src/robot-to-onboard/base_rpi/launch/robo-to-start.sh
 # Restart=on-failure
 
 [Install]
