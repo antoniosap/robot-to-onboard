@@ -51,7 +51,7 @@ def btn_stick(data):
 
 
 if __name__ == '__main__':
-    node_name = rospy.get_caller_id()
+    node_name = 'base_rpi'
     # registering node in ros master
     rospy.init_node(node_name, log_level=rospy.INFO)
     # begin node code
