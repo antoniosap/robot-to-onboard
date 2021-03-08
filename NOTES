@@ -1,8 +1,7 @@
-3.3.2021
+7.3.2021
 --------
 
-TODO gps ritardare avvio
-TODO sequenza shutdown dal pulsante
+TODO attivare diffential drive
 
 NFS SHARE:
 sudo mount -vvvv rosrobot:/home/pi/workspace-ros1/src/robot-to-onboard   /home/aldebaran/workspace-ros1/src/robot-to-onboard/nfs_share
