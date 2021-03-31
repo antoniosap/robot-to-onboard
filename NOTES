@@ -2,6 +2,7 @@
 --------
 
 TODO attivare diffential drive
+TODO pan_tilt a posizioni on/off all'accensione con un controller di velocita / posizione standard
 
 NFS SHARE:
 sudo mount -vvvv rosrobot:/home/pi/workspace-ros1/src/robot-to-onboard   /home/aldebaran/workspace-ros1/src/robot-to-onboard/nfs_share

@@ -23,52 +23,70 @@ from std_msgs.msg import Bool, String
 #
 
 
-def btn_shutdown(data):
-    rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
-    status = str(data.data) == 'True'
-    if status:
-        msg = 'shutdown in progress'
-        rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
-        pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
-        pub_display8x8.publish(msg)
-        pub_cam_light_led = rospy.Publisher('/base/cam_light_led', Bool, queue_size=10)
-        pub_cam_light_led.publish(False)
-        os.system("sudo shutdown -h 1")
+class BaseOnBoard:
+    def __init__(self):
+        self.node_name = 'base_rpi'
+        # registering node in ros master
+        rospy.init_node(self.node_name, log_level=rospy.INFO)
+        rospy.on_shutdown(self.shutdown)
+        # begin node code
+        rospy.loginfo(f'{self.node_name} Starting: please, arm motors ')
+        # pub
+        self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
+        self.pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
+        self.pub_cam_light_led = rospy.Publisher('/base/cam_light_led', Bool, queue_size=10)
+        # sub - Don't subscribe until everything has been initialized.
+        rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
+        rospy.Subscriber("/sensehat/stick", String, btn_stick)
 
+    @staticmethod
+    def clamp(n, minn, maxn):
+        return max(min(maxn, n), minn)
 
-def btn_stick(data):
-    # change axis reference
-    status = str(data.data)
-    pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
-    if status == 'up':
-        pub_stick.publish('right')
-    elif status == 'down':
-        pub_stick.publish('left')
-    elif status == 'right':
-        pub_stick.publish('down')
-    elif status == 'left':
-        pub_stick.publish('up')
+    def home_off(self):
+        pass
+
+    def home_on(self):
+        pass
+
+    def shutdown(self, data):
+        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
+        status = str(data.data) == 'True'
+        if status:
+            msg = 'shutdown in progress'
+            rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
+            self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
+            self.pub_display8x8.publish(msg)
+            self.pub_cam_light_led.publish(False)
+            self.home_off()
+            os.system("sudo shutdown -h 1")
+
+    def btn_stick(self, data):
+        # change axis reference
+        status = str(data.data)
+        self.pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
+        if status == 'up':
+            self.pub_stick.publish('right')
+        elif status == 'down':
+            self.pub_stick.publish('left')
+        elif status == 'right':
+            self.pub_stick.publish('down')
+        elif status == 'left':
+            self.pub_stick.publish('up')
+
+    def spin(self):
+        rospy.sleep(0.1)
+        self.home_on()
+        rate = rospy.Rate(10)  # hz
+        while not rospy.is_shutdown():
+            rate.sleep()
 
 
 if __name__ == '__main__':
-    node_name = 'base_rpi'
-    # registering node in ros master
-    rospy.init_node(node_name, log_level=rospy.INFO)
-    # begin node code
-    rospy.loginfo(f'{node_name} Starting ')
-    # sub
-    rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
-    rospy.Subscriber("/sensehat/stick", String, btn_stick)
-    # pub
-    pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
-    pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
-    #
-    rate = rospy.Rate(1)  # hz
+    base_rpi = BasePc()
     try:
-        while not rospy.is_shutdown():
-
-            rate.sleep()
+        base_rpi.spin()
     except Exception as error:
-        rospy.logerr(f'{node_name} Error on Main: {error}')
+        rospy.logerr(f'{base_pc.node_name} Error on Main: {error}')
     except rospy.ROSInterruptException:
-        rospy.loginfo(f'{node_name} Shutdown')
+        rospy.loginfo(f'{base_pc.node_name} Shutdown')
