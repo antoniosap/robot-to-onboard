@@ -29,6 +29,8 @@ class BaseOnBoard:
         # registering node in ros master
         rospy.init_node(self.node_name, log_level=rospy.INFO)
         rospy.on_shutdown(self.shutdown)
+        # begin node code
+        #
         # pub
         self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
         self.pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
@@ -36,8 +38,8 @@ class BaseOnBoard:
         self.pub_cam_pan = rospy.Publisher('base/cam_pan', Int16, queue_size=10)
         self.pub_cam_tilt = rospy.Publisher('base/cam_tilt', Int16, queue_size=10)
         # sub - Don't subscribe until everything has been initialized.
-        rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
-        rospy.Subscriber("/sensehat/stick", String, btn_stick)
+        rospy.Subscriber("/base/btn_shutdown", Bool, self.shutdown)
+        rospy.Subscriber("/sensehat/stick", String, self.btn_stick)
 
     @staticmethod
     def clamp(n, minn, maxn):
@@ -48,21 +50,22 @@ class BaseOnBoard:
         self.pub_cam_tilt.publish(tilt)
 
     def home_off(self):
-        self.servo_publish(pan=90, tilt=185)
-
-    def home_on(self):
         self.servo_publish(pan=90, tilt=90)
 
+    def home_on(self):
+        self.servo_publish(pan=90, tilt=185)
+
     def shutdown(self, data):
-        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
-        status = str(data.data) == 'True'
+        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
+        status = str(data) == 'True'
         if status:
             msg = 'shutdown in progress'
             rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
             self.pub_display8x8.publish(msg)
             self.pub_cam_light_led.publish(False)
             self.home_off()
-            os.system("sudo shutdown -h 1")
+            # os.system("sudo shutdown -h 1")
+            # TODO migliorare lo shutdown perche fuori dello spin si blocca la messaggistica
 
     def btn_stick(self, data):
         # change axis reference
@@ -80,7 +83,6 @@ class BaseOnBoard:
     def spin(self):
         rospy.loginfo(f'{self.node_name} Starting: please, arm motors')
         rospy.sleep(20)
-        # begin node code
         rospy.loginfo(f'{self.node_name} Started')
         self.home_on()
         rate = rospy.Rate(10)  # hz
@@ -89,7 +91,7 @@ class BaseOnBoard:
 
 
 if __name__ == '__main__':
-    base_rpi = BasePc()
+    base_rpi = BaseOnBoard()
     try:
         base_rpi.spin()
     except Exception as error:
