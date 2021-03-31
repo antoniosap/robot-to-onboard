@@ -29,8 +29,6 @@ class BaseOnBoard:
         # registering node in ros master
         rospy.init_node(self.node_name, log_level=rospy.INFO)
         rospy.on_shutdown(self.shutdown)
-        # begin node code
-        rospy.loginfo(f'{self.node_name} Starting: please, arm motors ')
         # pub
         self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
         self.pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
@@ -80,7 +78,10 @@ class BaseOnBoard:
             self.pub_stick.publish('up')
 
     def spin(self):
-        rospy.sleep(0.1)
+        rospy.loginfo(f'{self.node_name} Starting: please, arm motors')
+        rospy.sleep(20)
+        # begin node code
+        rospy.loginfo(f'{self.node_name} Started')
         self.home_on()
         rate = rospy.Rate(10)  # hz
         while not rospy.is_shutdown():
