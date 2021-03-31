@@ -45,13 +45,15 @@ class BaseOnBoard:
     def clamp(n, minn, maxn):
         return max(min(maxn, n), minn)
 
+    def servo_publish(self, pan, tilt):
+        self.pub_cam_pan.publish(pan)
+        self.pub_cam_tilt.publish(tilt)
+
     def home_off(self):
-        self.pub_cam_pan.publish(90)
-        self.pub_cam_tilt.publish(185)
+        self.servo_publish(pan=90, tilt=185)
 
     def home_on(self):
-        self.pub_cam_pan.publish(90)
-        self.pub_cam_tilt.publish(90)
+        self.servo_publish(pan=90, tilt=90)
 
     def shutdown(self, data):
         rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
