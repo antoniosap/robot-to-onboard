@@ -14,7 +14,7 @@ __status__ = "Development"
 import os
 import rospy
 import sensor_msgs.msg as sensor_msgs
-from std_msgs.msg import Bool, String
+from std_msgs.msg import Bool, String, Int16
 
 # ---------------------------------------------------------------------
 # sites info:
@@ -35,6 +35,8 @@ class BaseOnBoard:
         self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
         self.pub_stick = rospy.Publisher('/base/stick', String, queue_size=1)
         self.pub_cam_light_led = rospy.Publisher('/base/cam_light_led', Bool, queue_size=10)
+        self.pub_cam_pan = rospy.Publisher('base/cam_pan', Int16, queue_size=10)
+        self.pub_cam_tilt = rospy.Publisher('base/cam_tilt', Int16, queue_size=10)
         # sub - Don't subscribe until everything has been initialized.
         rospy.Subscriber("/base/btn_shutdown", Bool, btn_shutdown)
         rospy.Subscriber("/sensehat/stick", String, btn_stick)
@@ -44,10 +46,12 @@ class BaseOnBoard:
         return max(min(maxn, n), minn)
 
     def home_off(self):
-        pass
+        self.pub_cam_pan.publish(90)
+        self.pub_cam_tilt.publish(185)
 
     def home_on(self):
-        pass
+        self.pub_cam_pan.publish(90)
+        self.pub_cam_tilt.publish(90)
 
     def shutdown(self, data):
         rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data.data}')
@@ -55,7 +59,6 @@ class BaseOnBoard:
         if status:
             msg = 'shutdown in progress'
             rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
-            self.pub_display8x8 = rospy.Publisher('/sensehat/led_panel', String, queue_size=10)
             self.pub_display8x8.publish(msg)
             self.pub_cam_light_led.publish(False)
             self.home_off()
