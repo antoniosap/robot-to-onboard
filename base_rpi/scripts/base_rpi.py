@@ -31,7 +31,7 @@ class SCurve1AxisMotion(ScurvePlanner):
     SPEED_ID = 1
     POSITION_ID = 2
 
-    def __init__(self, axis_name, debug=False, dt=0.3):
+    def __init__(self, axis_name, debug=False, dt=0.3, callback=print):
         super().__init__(debug)
         self._axis_name = axis_name
         self._q0 = [32.]
@@ -44,6 +44,7 @@ class SCurve1AxisMotion(ScurvePlanner):
         self._dt = dt
         self._profile = None
         self._store = {}
+        self._callback = callback
 
     @property
     def q0(self):
@@ -158,7 +159,7 @@ class SCurve1AxisMotion(ScurvePlanner):
 
     async def _exec_t(self):
         for t in range(0, len(self._profile)):
-            print(self._axis_name, self._profile[t])
+            self._callback(self._axis_name, self._profile[t])
             await asyncio.sleep(self._dt)
 
     async def asy_exec_trajectory(self):
@@ -166,9 +167,10 @@ class SCurve1AxisMotion(ScurvePlanner):
 
 
 class SCurve2AxisMotion:
-    def __init__(self, axis1_name, axis2_name, debug=False, dt=0.3):
-        self._axis1 = SCurve1AxisMotion(axis1_name)
-        self._axis2 = SCurve1AxisMotion(axis2_name)
+    def __init__(self, axis1_name, axis2_name, debug=False, dt=0.3,
+                 axis1_callback=print, axis2_callback=print):
+        self._axis1 = SCurve1AxisMotion(axis1_name, dt=dt, callback=axis1_callback)
+        self._axis2 = SCurve1AxisMotion(axis2_name, dt=dt, callback=axis2_callback)
 
     @property
     def axis1(self):
@@ -199,15 +201,19 @@ class BaseOnBoard:
     cam_tilt_range = (70, 185)
     cam_off = (90, 90)
     cam_on = (90, 185)
+    spin_hertz = 10
 
     def __init__(self):
         self.node_name = 'base_rpi'
         # registering node in ros master
         rospy.init_node(self.node_name, log_level=rospy.INFO)
         rospy.on_shutdown(self.shutdown)
+        self.shutdown_request = False
+        self.shutdown_counter = self.spin_hertz * 60  # 10 hz * 60 sec
         # begin node code
         self.cam_cur = self.cam_off       # off position [pan, tilt]
-        self.two_axis = SCurve2AxisMotion('pan', 'tilt')
+        self.two_axis = SCurve2AxisMotion('pan', 'tilt', dt=0.3,
+                                          axis1_callback=self.axis1_cb, axis2_callback=self.axis2_cb)
         # off to on pose
         self.two_axis.do_plan_trajectory(pan_q0=self.cam_cur[0], pan_q1=self.cam_on[0],
                                          tilt_q0=self.cam_cur[1], tilt_q1=self.cam_on[1])
@@ -234,11 +240,18 @@ class BaseOnBoard:
         self.pub_cam_pan.publish(pan)
         self.pub_cam_tilt.publish(tilt)
 
+    # pan axis
+    def axis1_cb(self, axis_name, axis_position):
+        self.pub_cam_pan.publish(axis_position)
+
+    # tilt axis
+    def axis2_cb(self, axis_name, axis_position):
+        self.pub_cam_tilt.publish(axis_position)
+
     def home_off(self):
         self.two_axis.do_plan_trajectory(pan_q0=self.cam_cur[0], pan_q1=self.cam_off[0],
                                          tilt_q0=self.cam_cur[1], tilt_q1=self.cam_off[1])
         self.axis_move_exec = True  # move to off pose
-        # self.servo_publish(pan=90, tilt=90)
 
     def home_on(self):
         self.two_axis.recall('home_on')
@@ -254,8 +267,7 @@ class BaseOnBoard:
             self.pub_display8x8.publish(msg)
             self.pub_cam_light_led.publish(False)
             self.home_off()
-            # os.system("sudo shutdown -h 1")
-            # TODO migliorare lo shutdown perche fuori dello spin si blocca la messaggistica
+            self.shutdown_request = True
 
     def btn_stick(self, data):
         # change axis reference
@@ -275,7 +287,7 @@ class BaseOnBoard:
             rospy.loginfo(f'{self.node_name} Starting: asy_axis_spin')
             rospy.sleep(20)
             rospy.loginfo(f'{self.node_name} Started')
-            rate = rospy.Rate(10)  # hz
+            rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
                 if self.axis_move_exec:
                     await self.two_axis.asy_exec_trajectory()
@@ -292,8 +304,14 @@ class BaseOnBoard:
             rospy.loginfo(f'{self.node_name} Starting: asy_ros_spin')
             rospy.sleep(20)
             rospy.loginfo(f'{self.node_name} Started')
-            rate = rospy.Rate(10)  # hz
+            rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
+                if self.shutdown_request:
+                    if self.shutdown_counter > 0:
+                        self.shutdown_counter -= 1
+                    else:
+                        pass
+                        # os.system("sudo shutdown -h 1")
                 rate.sleep()
         except Exception as error:
             rospy.logerr(f'{base_rpi.node_name} asy_ros_spin: {error}')
