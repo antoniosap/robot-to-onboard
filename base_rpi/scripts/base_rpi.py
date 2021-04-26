@@ -256,7 +256,6 @@ class BaseOnBoard:
     def home_on(self):
         self.two_axis.recall('home_on')
         self.axis_move_exec = True  # move to on pose
-        # self.servo_publish(pan=90, tilt=185)
 
     def shutdown(self, data):
         rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
