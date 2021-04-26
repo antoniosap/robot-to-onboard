@@ -188,8 +188,11 @@ class SCurve2AxisMotion:
         self._axis2.store(label)
 
     def do_plan_trajectory(self, pan_q0, pan_q1, tilt_q0, tilt_q1):
+        print("3 -----------------------", pan_q0, pan_q1)
         self._axis1.do_plan_trajectory(pan_q0, pan_q1)
+        print("4 -----------------------")
         self._axis2.do_plan_trajectory(tilt_q0, tilt_q1)
+        print("5 -----------------------", tilt_q0, tilt_q1)
 
     async def asy_exec_trajectory(self):
         await asyncio.gather(self._axis1.asy_exec_trajectory(),
@@ -212,11 +215,13 @@ class BaseOnBoard:
         self.shutdown_counter = self.spin_hertz * 60  # 10 hz * 60 sec
         # begin node code
         self.cam_cur = self.cam_off       # off position [pan, tilt]
-        self.two_axis = SCurve2AxisMotion('pan', 'tilt', dt=0.3,
+        self.two_axis = SCurve2AxisMotion('pan', 'tilt', dt=0.3, debug=True,
                                           axis1_callback=self.axis1_cb, axis2_callback=self.axis2_cb)
         # off to on pose
+        print("1 -----------------------")
         self.two_axis.do_plan_trajectory(pan_q0=self.cam_cur[0], pan_q1=self.cam_on[0],
                                          tilt_q0=self.cam_cur[1], tilt_q1=self.cam_on[1])
+        print("2 -----------------------")
         self.two_axis.store('home_on')
         self.axis_move_exec = False
         # pub

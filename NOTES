@@ -1,7 +1,7 @@
 25.4.2021
 ---------
 
-TODO test pan tilt coroutines
+TODO test pan tilt coroutines, disabilita l asse se 90 t0 --> 90 t1
 TODO collegare yoy stick alla camera
 TODO collegare imu + calibrazione
 
