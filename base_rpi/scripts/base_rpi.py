@@ -244,7 +244,7 @@ class BaseOnBoard:
         rospy.sleep(20)  # wait processes spinning and board card started
         self.home_on()
         # sub - Don't subscribe until everything has been initialized.
-        rospy.Subscriber("/base/btn_shutdown", Bool, self.shutdown)
+        rospy.Subscriber("/base/btn_shutdown", Bool, self.btn_shutdown)
         rospy.Subscriber("/sensehat/stick", String, self.btn_stick)
 
     @staticmethod
@@ -272,8 +272,8 @@ class BaseOnBoard:
         self.two_axis.recall('home_on')
         self.axis_move_exec = True  # move to on pose
 
-    def shutdown(self, data):
-        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
+    def btn_shutdown(self, data):
+        rospy.logdebug(f'{rospy.get_caller_id()} shutdown button {data}')
         if data and not self.shutdown_request:
             self.shutdown_request = True
             msg = 'shutdown in progress'
