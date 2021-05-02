@@ -34,6 +34,7 @@ class SCurve1AxisMotion(ScurvePlanner):
     def __init__(self, axis_name, debug=False, dt=0.3, callback=print):
         super().__init__(debug)
         self._axis_name = axis_name
+        self._enable = True
         self._q0 = [32.]
         self._q1 = [120.]
         self._v0 = [1.]
@@ -45,6 +46,14 @@ class SCurve1AxisMotion(ScurvePlanner):
         self._profile = None
         self._store = {}
         self._callback = callback
+
+    @property
+    def enable(self):
+        return self._enable
+
+    @enable.setter
+    def enable(self, value):
+        self._enable = value
 
     @property
     def q0(self):
@@ -125,6 +134,11 @@ class SCurve1AxisMotion(ScurvePlanner):
             self.q0 = q0
         if q1 is not None:
             self.q1 = q1
+        if q0 == q1:
+            self._enable = False
+            self._profile = None
+            return
+        self._enable = True
         traj = self.plan_trajectory(self._q0, self._q1, self._v0, self._v1, self._v_max, self._a_max, self._j_max)
         dof = traj.dof
         timesteps = int(max(traj.time) / self.dt)
@@ -158,9 +172,10 @@ class SCurve1AxisMotion(ScurvePlanner):
         await asyncio.create_task(self._exec_t())
 
     async def _exec_t(self):
-        for t in range(0, len(self._profile)):
-            self._callback(self._axis_name, self._profile[t])
-            await asyncio.sleep(self._dt)
+        if self._profile is not None and self._enable:
+            for t in range(0, len(self._profile)):
+                self._callback(self._axis_name, self._profile[t])
+                await asyncio.sleep(self._dt)
 
     async def asy_exec_trajectory(self):
         await self._exec_t()
