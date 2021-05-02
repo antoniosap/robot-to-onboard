@@ -222,7 +222,6 @@ class BaseOnBoard:
         self.node_name = 'base_rpi'
         # registering node in ros master
         rospy.init_node(self.node_name, log_level=rospy.INFO)
-        rospy.on_shutdown(self.shutdown)
         self.shutdown_request = False
         self.shutdown_counter = self.spin_hertz * 60  # 10 hz * 60 sec
         # begin node code
@@ -320,10 +319,11 @@ class BaseOnBoard:
             rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
                 if self.shutdown_request:
+                    rospy.loginfo(f'{self.node_name} {self.shutdown_counter}')
                     if self.shutdown_counter > 0:
                         self.shutdown_counter -= 1
                     else:
-                        pass
+                        exit(1)
                         # os.system("sudo shutdown -h 1")
                 rate.sleep()
         except Exception as error:
