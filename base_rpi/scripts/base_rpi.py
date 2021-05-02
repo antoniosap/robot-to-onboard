@@ -299,8 +299,8 @@ class BaseOnBoard:
     async def asy_axis_spin(self):
         try:
             rospy.loginfo(f'{self.node_name} Starting: asy_axis_spin')
-            rospy.sleep(60)   # wait processes spinning and board card 'base_ardu' started
-            rospy.loginfo(f'{self.node_name} Started')
+            rospy.sleep(30)   # wait processes spinning and board card 'base_ardu' started
+            rospy.loginfo(f'{self.node_name} Started: asy_axis_spin')
             rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
                 if self.axis_move_exec:
@@ -317,7 +317,7 @@ class BaseOnBoard:
         try:
             rospy.loginfo(f'{self.node_name} Starting: asy_ros_spin')
             rospy.sleep(20)
-            rospy.loginfo(f'{self.node_name} Started')
+            rospy.loginfo(f'{self.node_name} Started: asy_ros_spin')
             rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
                 if self.shutdown_request:
@@ -333,8 +333,8 @@ class BaseOnBoard:
             rospy.loginfo(f'{base_rpi.node_name} Shutdown asy_ros_spin')
 
     async def asy_run(self):
-        await asyncio.gather(self.asy_ros_spin(),
-                             self.asy_axis_spin())
+        await asyncio.gather(self.asy_axis_spin(),
+                             self.asy_ros_spin())
 
 
 if __name__ == '__main__':
