@@ -302,8 +302,11 @@ class BaseOnBoard:
             rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
                 if self.axis_move_exec:
+                    rospy.loginfo(f'{self.node_name} -----> 1')
                     await self.two_axis.asy_exec_trajectory()
+                    rospy.loginfo(f'{self.node_name} -----> 2 {self.two_axis.axis1.q1} {self.two_axis.axis2.q2}')
                     self.cam_cur = (self.two_axis.axis1.q1, self.two_axis.axis2.q1)
+                    rospy.loginfo(f'{self.node_name} -----> 3')
                     self.axis_move_exec = False
                 rate.sleep()
         except Exception as error:
