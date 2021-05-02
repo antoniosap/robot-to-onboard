@@ -273,8 +273,8 @@ class BaseOnBoard:
         self.axis_move_exec = True  # move to on pose
 
     def shutdown(self, data):
-        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data} {type(data)}')
-        if data:
+        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
+        if data and not self.shutdown_request:
             msg = 'shutdown in progress'
             rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
             self.pub_display8x8.publish(msg)
@@ -332,8 +332,8 @@ class BaseOnBoard:
             rospy.loginfo(f'{base_rpi.node_name} Shutdown asy_ros_spin')
 
     async def asy_run(self):
-        await asyncio.gather(self.asy_axis_spin(),
-                             self.asy_ros_spin())
+        await asyncio.gather(self.asy_axis_spin(),  # critical order (1)
+                             self.asy_ros_spin())   # critical order (2)
 
 
 if __name__ == '__main__':
