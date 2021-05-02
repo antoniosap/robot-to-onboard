@@ -275,12 +275,12 @@ class BaseOnBoard:
     def shutdown(self, data):
         rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
         if data and not self.shutdown_request:
+            self.shutdown_request = True
             msg = 'shutdown in progress'
             rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
             self.pub_display8x8.publish(msg)
             self.pub_cam_light_led.publish(False)
             self.home_off()
-            self.shutdown_request = True
 
     def btn_stick(self, data):
         # change axis reference
