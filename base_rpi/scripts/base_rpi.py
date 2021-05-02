@@ -273,9 +273,8 @@ class BaseOnBoard:
         self.axis_move_exec = True  # move to on pose
 
     def shutdown(self, data):
-        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data}')
-        status = str(data) == 'True'
-        if status:
+        rospy.loginfo(f'{rospy.get_caller_id()} shutdown button {data} {type(data)}')
+        if data:
             msg = 'shutdown in progress'
             rospy.loginfo(f'{rospy.get_caller_id()} {msg}')
             self.pub_display8x8.publish(msg)
