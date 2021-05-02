@@ -203,11 +203,8 @@ class SCurve2AxisMotion:
         self._axis2.store(label)
 
     def do_plan_trajectory(self, pan_q0, pan_q1, tilt_q0, tilt_q1):
-        print("3 -----------------------", pan_q0, pan_q1)
         self._axis1.do_plan_trajectory(pan_q0, pan_q1)
-        print("4 -----------------------")
         self._axis2.do_plan_trajectory(tilt_q0, tilt_q1)
-        print("5 -----------------------", tilt_q0, tilt_q1)
 
     async def asy_exec_trajectory(self):
         await asyncio.gather(self._axis1.asy_exec_trajectory(),
@@ -233,10 +230,8 @@ class BaseOnBoard:
         self.two_axis = SCurve2AxisMotion('pan', 'tilt', dt=0.3, debug=True,
                                           axis1_callback=self.axis1_cb, axis2_callback=self.axis2_cb)
         # off to on pose
-        print("1 -----------------------")
         self.two_axis.do_plan_trajectory(pan_q0=self.cam_cur[0], pan_q1=self.cam_on[0],
                                          tilt_q0=self.cam_cur[1], tilt_q1=self.cam_on[1])
-        print("2 -----------------------")
         self.two_axis.store('home_on')
         self.axis_move_exec = False
         # pub
@@ -246,7 +241,7 @@ class BaseOnBoard:
         self.pub_cam_pan = rospy.Publisher('base/cam_pan', Int16, queue_size=10)
         self.pub_cam_tilt = rospy.Publisher('base/cam_tilt', Int16, queue_size=10)
         #
-        rospy.sleep(40)  # wait processes spinng
+        rospy.sleep(20)  # wait processes spinning and board card started
         self.home_on()
         # sub - Don't subscribe until everything has been initialized.
         rospy.Subscriber("/base/btn_shutdown", Bool, self.shutdown)
@@ -304,7 +299,7 @@ class BaseOnBoard:
     async def asy_axis_spin(self):
         try:
             rospy.loginfo(f'{self.node_name} Starting: asy_axis_spin')
-            rospy.sleep(20)
+            rospy.sleep(60)   # wait processes spinning and board card 'base_ardu' started
             rospy.loginfo(f'{self.node_name} Started')
             rate = rospy.Rate(self.spin_hertz)  # hz
             while not rospy.is_shutdown():
