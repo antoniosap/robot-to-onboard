@@ -1,7 +1,20 @@
+8.5.2021
+--------
+
+ROS 2 migrato definitivo
+info sites:
+https://docs.ros.org/en/foxy/Tutorials/Configuring-ROS2-Environment.html
+
+
 25.4.2021
 ---------
 
 TODO test pan tilt coroutines, disabilita l asse se 90 t0 --> 90 t1
+    rospy classico non supporta gli async/await
+    quindi ce da installare aiorospy:
+    sudo -H apt-get install -y virtualenv
+    https://github.com/locusrobotics/aiorospy.git
+    https://github.com/locusrobotics/catkin_virtualenv.git
 TODO collegare yoy stick alla camera
 TODO collegare imu + calibrazione
 
@@ -10,6 +23,9 @@ TODO collegare imu + calibrazione
 
 TODO attivare diffential drive
 TODO pan_tilt a posizioni on/off all'accensione con un controller di velocita / posizione standard
+
+UPDATES:
+rosdep install -y --from-paths src --ignore-src --rosdistro noetic -r --os=debian:buster
 
 NFS SHARE:
 sudo mount -vvvv rosrobot:/home/pi/workspace-ros1/src/robot-to-onboard   /home/aldebaran/workspace-ros1/src/robot-to-onboard/nfs_share
