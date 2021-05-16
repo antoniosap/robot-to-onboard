@@ -295,7 +295,7 @@ VLC media player 3.0.11 Vetinari (revision 3.0.11-0-gdc0c5ced72)
 [INFO] [1613901883.311472]: /base_sensehat Starting
 [ERROR] [1613901898.971511]: Unable to sync with device; possible link problem or link software version mismatch such as hydro rosserial_python with groovy Arduino
 [INFO] [1613901899.004656]: Note: publish buffer size is 512 bytes
-[INFO] [1613901899.007857]: Setup publisher on base/btn_shutdown [std_msgs/Bool]
+[INFO] [1613901899.007857]: Setup publisher on base/btn_shutdown_cb [std_msgs/Bool]
 [INFO] [1613901899.028803]: Setup publisher on base/btn_emergency [std_msgs/Bool]
 [INFO] [1613901899.047195]: Setup publisher on base/pir_n [std_msgs/Bool]
 [INFO] [1613901899.067634]: Setup publisher on base/pir_se [std_msgs/Bool]

@@ -11,6 +11,9 @@ sudo apt install ros-foxy-teleop-twist-keyboard
 MODIFICHE PYCHARM:
 https://wiki.ros.org/IDEs#Plugins-1
 
+TODO trasformare in action
+TODO test on board
+
 25.4.2021
 ---------
 
@@ -51,7 +54,7 @@ Published topics:
  * /sensehat/magnetometer [geometry_msgs/Vector3] 1 publisher
  * /sensehat/compass [std_msgs/Float64] 1 publisher
  * /sensehat/stick [std_msgs/String] 1 publisher
- * /base/btn_shutdown [std_msgs/Bool] 1 publisher
+ * /base/btn_shutdown_cb [std_msgs/Bool] 1 publisher
  * /base/btn_emergency [std_msgs/Bool] 1 publisher
  * /base/pir_n [std_msgs/Bool] 1 publisher
  * /base/pir_se [std_msgs/Bool] 1 publisher
