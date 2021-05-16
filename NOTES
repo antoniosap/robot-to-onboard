@@ -4,7 +4,12 @@
 ROS 2 migrato definitivo
 info sites:
 https://docs.ros.org/en/foxy/Tutorials/Configuring-ROS2-Environment.html
+TWIST ROBOT JOYSTICK:
+sudo apt install ros-foxy-teleop-twist-joy
+sudo apt install ros-foxy-teleop-twist-keyboard
 
+MODIFICHE PYCHARM:
+https://wiki.ros.org/IDEs#Plugins-1
 
 25.4.2021
 ---------
