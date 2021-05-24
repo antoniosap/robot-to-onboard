@@ -8,8 +8,8 @@
 # BTN B  GPIO6 (31) (32) GPIO12  JOY W
 # BTN A GPIO13 (33) (34) GND
 # BTN Y GPIO19 (35) (36) GPIO16  JOY E
-# BTN X GPIO26 (37) (38) GPIO20  JOY S
-#          GND (39) (40) GPIO21  JOY N
+# BTN X GPIO26 (37) (38) GPIO20  JOY N
+#          GND (39) (40) GPIO21  JOY S
 
 import json
 import logging
@@ -25,11 +25,11 @@ class JoyBoxServer:
     def __init__(self, mqtt_broker='localhost', mqtt_port=1883, level=logging.INFO):
         logging.getLogger().setLevel(level=level)
         self.module_type = 'JoyBoxServer'
-        self.joy_n = Button(21, bounce_time=BT)
+        self.joy_n = Button(20, bounce_time=BT)
         self.joy_n.when_pressed = self.joy_n_when_pressed
         self.joy_n.when_released = self.joy_n_when_released
         self.joy_n.when_held = self.joy_n_when_held
-        self.joy_s = Button(20, bounce_time=BT)
+        self.joy_s = Button(21, bounce_time=BT)
         self.joy_s.when_pressed = self.joy_s_when_pressed
         self.joy_s.when_released = self.joy_s_when_released
         self.joy_s.when_held = self.joy_s_when_held

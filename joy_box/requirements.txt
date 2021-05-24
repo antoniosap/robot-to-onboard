@@ -8,6 +8,7 @@
 #
 paho-mqtt
 gpiozero
+RPI.GPIO
 
 # pi@rpi3:~ $ pinout
 # .-------------------------.
