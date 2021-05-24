@@ -10,6 +10,10 @@
 # BTN Y GPIO19 (35) (36) GPIO16  JOY E
 # BTN X GPIO26 (37) (38) GPIO20  JOY N
 #          GND (39) (40) GPIO21  JOY S
+#
+# MQTT INTERFACE:
+# mosquitto_sub -h 192.168.147.1    -t joy_box/signal   <--- bridged on router
+# mosquitto_sub -h 192.168.147.176  -t joy_box/signal   <--- joy_box mqtt server
 
 import json
 import logging
