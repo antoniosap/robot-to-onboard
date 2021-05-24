@@ -171,6 +171,7 @@ class JoyBoxServer:
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_held'))
         self.mqtt_publish("btn_x", "when_held")
         self.btn_x_held = True
+        self.check_shutdown_request()
 
     def btn_y_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_pressed'))
@@ -185,6 +186,7 @@ class JoyBoxServer:
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_held'))
         self.mqtt_publish("btn_y", "when_held")
         self.btn_y_held = True
+        self.check_shutdown_request()
 
     def btn_a_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_pressed'))
@@ -199,6 +201,7 @@ class JoyBoxServer:
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_held'))
         self.mqtt_publish("btn_a", "when_held")
         self.btn_a_held = True
+        self.check_shutdown_request()
 
     def btn_b_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_pressed'))
@@ -213,6 +216,7 @@ class JoyBoxServer:
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_held'))
         self.mqtt_publish("btn_b", "when_held")
         self.btn_b_held = True
+        self.check_shutdown_request()
 
     def check_shutdown_request(self):
         if self.btn_a_held and self.btn_b_held and self.btn_x_held and self.btn_y_held:
