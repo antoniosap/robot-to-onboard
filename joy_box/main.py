@@ -192,4 +192,4 @@ class JoyBoxServer:
 
 
 if __name__ == '__main__':
-    joy_box = JoyBoxServer(level=logging.DEBUG)
+    joy_box = JoyBoxServer()
