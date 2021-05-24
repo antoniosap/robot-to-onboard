@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #
 # 23.5.2021
 #
@@ -64,7 +65,7 @@ class JoyBoxServer:
         self.mqtt.on_disconnect = self.mqtt_on_disconnect
         self.mqtt.on_message = self.mqtt_on_message
         self.mqtt.connect(mqtt_broker, mqtt_port, keepalive=60)
-        self.mqtt.loop_start()
+        self.mqtt.loop_forever()  # blocking
 
     def mqtt_on_connect(self, client, userdata, flags, result_code):
         if result_code != mqtt.CONNACK_ACCEPTED:
@@ -188,3 +189,7 @@ class JoyBoxServer:
     def btn_b_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_held'))
         self.mqtt_publish("btn_b", "when_held")
+
+
+if __name__ == '__main__':
+    joy_box = JoyBoxServer(level=logging.DEBUG)
