@@ -22,7 +22,7 @@ import paho.mqtt.client as mqtt
 
 TOPIC_SIGNAL = "joy_box/signal"
 TOPIC_SETTINGS = "joy_box/settings"
-BT = 0.05
+BT = None
 
 
 class JoyBoxServer:
