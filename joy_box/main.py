@@ -14,9 +14,14 @@
 # MQTT INTERFACE:
 # mosquitto_sub -h 192.168.147.1    -t joy_box/signal   <--- bridged on router
 # mosquitto_sub -h 192.168.147.176  -t joy_box/signal   <--- joy_box mqtt server
+#
+# press x y a b on held --> shutdown
+#
 
 import json
 import logging
+from subprocess import check_call
+from datetime import datetime
 from gpiozero import Button
 import paho.mqtt.client as mqtt
 
@@ -61,6 +66,13 @@ class JoyBoxServer:
         self.btn_b.when_pressed = self.btn_b_when_pressed
         self.btn_b.when_released = self.btn_b_when_released
         self.btn_b.when_held = self.btn_b_when_held
+        #
+        self.shutdown_request = False
+        self.btn_a_held = False
+        self.btn_b_held = False
+        self.btn_x_held = False
+        self.btn_y_held = False
+        #
         self.mqtt_broker = mqtt_broker
         self.mqtt_port = mqtt_port
         self.mqtt_connected = False
@@ -95,7 +107,7 @@ class JoyBoxServer:
             pass
 
     def mqtt_publish(self, contact, action):
-        j = {'module_type': self.module_type, 'contact': contact, 'action': action}
+        j = {'module_type': self.module_type, 'contact': contact, 'action': action, 'timestamp': datetime.now().isoformat()}
         self.mqtt.publish(topic=TOPIC_SIGNAL, payload=json.dumps(j))
 
     def joy_n_when_pressed(self):
@@ -153,10 +165,12 @@ class JoyBoxServer:
     def btn_x_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_released'))
         self.mqtt_publish("btn_x", "when_released")
+        self.btn_x_held = False
 
     def btn_x_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_held'))
         self.mqtt_publish("btn_x", "when_held")
+        self.btn_x_held = True
 
     def btn_y_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_pressed'))
@@ -165,10 +179,12 @@ class JoyBoxServer:
     def btn_y_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_released'))
         self.mqtt_publish("btn_y", "when_released")
+        self.btn_y_held = False
 
     def btn_y_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_held'))
         self.mqtt_publish("btn_y", "when_held")
+        self.btn_y_held = True
 
     def btn_a_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_pressed'))
@@ -177,10 +193,12 @@ class JoyBoxServer:
     def btn_a_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_released'))
         self.mqtt_publish("btn_a", "when_released")
+        self.btn_a_held = False
 
     def btn_a_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_held'))
         self.mqtt_publish("btn_a", "when_held")
+        self.btn_a_held = True
 
     def btn_b_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_pressed'))
@@ -189,11 +207,17 @@ class JoyBoxServer:
     def btn_b_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_released'))
         self.mqtt_publish("btn_b", "when_released")
+        self.btn_b_held = False
 
     def btn_b_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_held'))
         self.mqtt_publish("btn_b", "when_held")
+        self.btn_b_held = True
+
+    def check_shutdown_request(self):
+        if self.btn_a_held and self.btn_b_held and self.btn_x_held and self.btn_y_held:
+            check_call(['sudo', 'poweroff'])
 
 
 if __name__ == '__main__':
-    joy_box = JoyBoxServer(level=logging.DEBUG)
+    joy_box = JoyBoxServer()
