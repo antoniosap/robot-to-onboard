@@ -2,3 +2,4 @@
 ---------
 
 sudo journalctl -u joy_box.service
+sudo systemctl status joy_box.service
