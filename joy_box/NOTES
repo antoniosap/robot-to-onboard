@@ -1,0 +1,4 @@
+25.5.2021
+---------
+
+sudo journalctl -u joy_box.service

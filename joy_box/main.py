@@ -112,109 +112,109 @@ class JoyBoxServer:
 
     def joy_n_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_n_when_pressed'))
-        self.mqtt_publish("joy_n", "when_pressed")
+        self.mqtt_publish("joy_n", "pressed")
 
     def joy_n_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_n_when_released'))
-        self.mqtt_publish("joy_n", "when_released")
+        self.mqtt_publish("joy_n", "released")
 
     def joy_n_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_n_when_held'))
-        self.mqtt_publish("joy_n", "when_held")
+        self.mqtt_publish("joy_n", "held")
 
     def joy_s_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_s_when_pressed'))
-        self.mqtt_publish("joy_s", "when_pressed")
+        self.mqtt_publish("joy_s", "pressed")
 
     def joy_s_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_s_when_released'))
-        self.mqtt_publish("joy_s", "when_released")
+        self.mqtt_publish("joy_s", "released")
 
     def joy_s_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_s_when_held'))
-        self.mqtt_publish("joy_s", "when_held")
+        self.mqtt_publish("joy_s", "held")
 
     def joy_e_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_e_when_pressed'))
-        self.mqtt_publish("joy_e", "when_pressed")
+        self.mqtt_publish("joy_e", "pressed")
 
     def joy_e_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_e_when_released'))
-        self.mqtt_publish("joy_e", "when_released")
+        self.mqtt_publish("joy_e", "released")
 
     def joy_e_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_e_when_held'))
-        self.mqtt_publish("joy_e", "when_held")
+        self.mqtt_publish("joy_e", "held")
 
     def joy_w_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_w_when_pressed'))
-        self.mqtt_publish("joy_w", "when_pressed")
+        self.mqtt_publish("joy_w", "pressed")
 
     def joy_w_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_w_when_released'))
-        self.mqtt_publish("joy_w", "when_released")
+        self.mqtt_publish("joy_w", "released")
 
     def joy_w_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'joy_w_when_held'))
-        self.mqtt_publish("joy_w", "when_held")
+        self.mqtt_publish("joy_w", "held")
 
     def btn_x_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_pressed'))
-        self.mqtt_publish("btn_x", "when_pressed")
+        self.mqtt_publish("btn_x", "pressed")
 
     def btn_x_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_released'))
-        self.mqtt_publish("btn_x", "when_released")
+        self.mqtt_publish("btn_x", "released")
         self.btn_x_held = False
 
     def btn_x_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_x_when_held'))
-        self.mqtt_publish("btn_x", "when_held")
+        self.mqtt_publish("btn_x", "held")
         self.btn_x_held = True
         self.check_shutdown_request()
 
     def btn_y_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_pressed'))
-        self.mqtt_publish("btn_y", "when_pressed")
+        self.mqtt_publish("btn_y", "pressed")
 
     def btn_y_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_released'))
-        self.mqtt_publish("btn_y", "when_released")
+        self.mqtt_publish("btn_y", "released")
         self.btn_y_held = False
 
     def btn_y_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_y_when_held'))
-        self.mqtt_publish("btn_y", "when_held")
+        self.mqtt_publish("btn_y", "held")
         self.btn_y_held = True
         self.check_shutdown_request()
 
     def btn_a_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_pressed'))
-        self.mqtt_publish("btn_a", "when_pressed")
+        self.mqtt_publish("btn_a", "pressed")
 
     def btn_a_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_released'))
-        self.mqtt_publish("btn_a", "when_released")
+        self.mqtt_publish("btn_a", "released")
         self.btn_a_held = False
 
     def btn_a_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_a_when_held'))
-        self.mqtt_publish("btn_a", "when_held")
+        self.mqtt_publish("btn_a", "held")
         self.btn_a_held = True
         self.check_shutdown_request()
 
     def btn_b_when_pressed(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_pressed'))
-        self.mqtt_publish("btn_b", "when_pressed")
+        self.mqtt_publish("btn_b", "pressed")
 
     def btn_b_when_released(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_released'))
-        self.mqtt_publish("btn_b", "when_released")
+        self.mqtt_publish("btn_b", "released")
         self.btn_b_held = False
 
     def btn_b_when_held(self):
         logging.debug("{}: {}".format(self.module_type, 'btn_b_when_held'))
-        self.mqtt_publish("btn_b", "when_held")
+        self.mqtt_publish("btn_b", "held")
         self.btn_b_held = True
         self.check_shutdown_request()
 

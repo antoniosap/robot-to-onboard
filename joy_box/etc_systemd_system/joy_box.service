@@ -1,0 +1,13 @@
+[Unit]
+Description=joy_box service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/robot-to-onboard/joy_box
+User=pi
+Group=pi
+ExecStart=/home/pi/.pyenv/shims/python main.py
+# Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
