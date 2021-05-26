@@ -17,6 +17,13 @@
 #
 # press x y a b on held --> shutdown
 #
+# MQTT EXAMPLES:
+# {"module_type": "JoyBoxServer", "contact": "joy_s", "action": "pressed", "timestamp": "2021-05-26T19:44:06.544778"}
+# {"module_type": "JoyBoxServer", "contact": "btn_a", "action": "pressed", "timestamp": "2021-05-26T19:45:09.871762"}
+# {"module_type": "JoyBoxServer", "contact": "btn_a", "action": "held", "timestamp": "2021-05-26T19:45:10.881939"}
+# {"module_type": "JoyBoxServer", "contact": "btn_a", "action": "released", "timestamp": "2021-05-26T19:45:11.424959"}
+# {"module_type": "JoyBoxServer", "contact": "system", "action": "poweroff", "timestamp": "2021-05-26T19:45:11.424959"}
+#
 
 import json
 import logging
@@ -220,6 +227,7 @@ class JoyBoxServer:
 
     def check_shutdown_request(self):
         if self.btn_a_held and self.btn_b_held and self.btn_x_held and self.btn_y_held:
+            self.mqtt_publish("system", "poweroff")
             check_call(['sudo', 'poweroff'])
 
 
