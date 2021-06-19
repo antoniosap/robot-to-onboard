@@ -12,6 +12,7 @@
  *                        10.10.2018 testing 1
  *                        14.12.2018 camera actuators
  *                        24.12.2018 camera relay test 2
+ *                        19.06.2021 usare BaseControl2 seza usare ros1 / ros2
  * NOTES ON USAGE:        source activate ros-env (on PC, on RPI dont needed)
  *                        process 1. roscore
  *                        process 2. rosrun rosserial_python serial_node.py _port:=/dev/ttyACM1 _baud:=115200
@@ -35,7 +36,7 @@
  *                        rostopic pub base/cam_light_led std_msgs/Bool False --once  ---> LED OFF
  *                        rostopic pub base/cam_light_led std_msgs/Bool True --once   ---> LED ON
  * 
- *                        rostopic echo base/btn_shutdown    ---> True = pressed
+ *                        rostopic echo base/btn_shutdown_cb    ---> True = pressed
  *                        rostopic echo base/btn_emergency   ---> True = pressed
  *                        rostopic echo base/pir_n
  *                        rostopic echo base/pir_se
@@ -305,7 +306,7 @@ std_msgs::Bool bpirN;
 std_msgs::Bool bpirSE;
 std_msgs::Bool bpirSW;
 
-ros::Publisher bshutPub("base/btn_shutdown", &bshut);
+ros::Publisher bshutPub("base/btn_shutdown_cb", &bshut);
 ros::Publisher bemerPub("base/btn_emergency", &bemer);
 #ifdef HAVE_BUMPERS
 ros::Publisher bbumpNPub("base/bump_n", &bbumpN);
