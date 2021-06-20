@@ -1,0 +1,33 @@
+20.6.2021
+---------
+
+controllare la V ruota con il feedback encoder + PID
+interfaccia seriale
+
+velocita: [-1..0..+1] float
+posizione: [-1..0..+1] float
+pulse: durata in sec float
+
+STP                             arresto
+STA X Z L T                     imposta velocita X avanti
+                                indietro Z sinistra / destra,
+                                L = impulsi encoder da percorrere, se non indicato non è limitato 
+                                T = pulse timeout max default 1 secondo (float)
+CAM X Y                         posizione camera X pan Y tilt
+IR 1/0                          infrared light camera on/off
+LIGHT 1/0                       white light camera on/off
+STRIP_LED R G B I               led matek [0.255] I=index [0..5]
+STATUS_LED 1/0
+AP                              ritorna la posizione corrente in impulsi assoluti
+RP                              ritorna la posizione corrente in impulsi relativi all'ultimo comando
+ZP                              azzera gli impulsi assoluti
+
+
+risposte:
+OK
+KO messaggio
+BTN_EME 1/0                     bottone emergency stop trigger 1/0
+BTN_SHUT 1/0                    bottone shutdown trigger 1/0
+PIR_N 1/0                       sensore PIR nord N trigger 1/0
+PIR_SE 1/0                      sensore PIR trigger 1/0
+PIR_SW 1/0                      sensore PIR trigger 1/0
