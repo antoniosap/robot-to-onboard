@@ -77,21 +77,29 @@ CRGB fastleds[NUM_LEDS];
 
 #define PWM_WHEEL_L       (3)
 #define PWM_WHEEL_R       (2)
+
+#define aggKp             4.00
+#define aggKi             0.20
+#define aggKd             1.00
+#define consKp            1.00
+#define consKi            0.05
+#define consKd            0.25
+
 Servo servoL;
-float xwL[3];             // left wheel position X @ t0 t1 t2
-float vwL[2];             // left wheel velocity V @ dt0 dt1
-float awL;                // left wheel acceleration A @ d2t0
-unsigned long xtL[3];     // left wheel position timestamp X @ t0 t1 t2
-unsigned long vtL[2];     // left wheel velocity V timestamp @ dt0 dt1
-unsigned long atL;        // left wheel acceleration A timestamp @ d2t0
+PID wlPID(&vwLin, &vwLout, &vwLset, consKp, consKi, consKd, DIRECT);
+float xwLin[2];        // left wheel position X
+float vwLin;           // left wheel velocity V
+float vwLset;          // left wheel velocity V
+float vwLout;          // left wheel velocity V
+float awL;             // left wheel acceleration A
 
 Servo servoR;
-float xwR[3];             // right wheel position X @ t0 t1 t2
-float vwR[2];             // right wheel velocity V @ dt0 dt1
-float awR;                // right wheel acceleration A @ d2t0
-unsigned long xtR[3];     // right wheel position timestamp X @ t0 t1 t2
-unsigned long vtR[2];     // right wheel velocity V timestamp @ dt0 dt1
-unsigned long atR;        // right wheel acceleration A timestamp @ d2t0
+PID wrPID(&vwRin, &vwRout, &vwRset, consKp, consKi, consKd, DIRECT);
+float xwRin[2];        // right wheel position X
+float vwRin;           // right wheel velocity V
+float vwRset;          // right wheel velocity V
+float vwRout;          // right wheel velocity V
+float awR;             // right wheel acceleration A
 
 #include <Derivs_Limiter.h>
 Derivs_Limiter limiterCamPan = Derivs_Limiter(100, 75);
@@ -179,36 +187,40 @@ void ledSet(char fun);
 void onLeftPulse();
 void onRightPulse();
 
+float mapf(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+  return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
+} 
+
 //-- ROS INTERFACE -------------------------------------------------------------
 // sites: https://answers.ros.org/question/164191/rosserial-arduino-cant-connect-arduino-micro/
-#define  USE_USBCON
+//#define  USE_USBCON
 // 
-#include <ros.h>
-#include <std_msgs/Int16.h>
-#include <std_msgs/Int32.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Int16MultiArray.h>
-#include <std_msgs/ColorRGBA.h>
+//#include <ros.h>
+//#include <std_msgs/Int16.h>
+//#include <std_msgs/Int32.h>
+//#include <std_msgs/Bool.h>
+//#include <std_msgs/Int16MultiArray.h>
+//#include <std_msgs/ColorRGBA.h>
 
-#define ROS_WHEEL_MIN   (-100)
-#define ROS_WHEEL_MAX   (+100)
-ros::NodeHandle  nh;
+#define ROS_WHEEL_MIN   (-1.0)
+#define ROS_WHEEL_MAX   (+1.0)
+//ros::NodeHandle  nh;
 
-int valueL = 0;
-int valueR = 0;
+//int valueL = 0;
+//int valueR = 0;
 
-// set left wheel velocity [-100, 100] + --> forward
+// set left wheel velocity + --> forward
 void wheelLvCb(const std_msgs::Int16& cmd_msg) {
-  valueL = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
-  servoL.write(map(valueL, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 0, 180));  
+  vwLset = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
+  servoL.write(mapf(vwLset, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 0, 180));  
 }
 
 ros::Subscriber<std_msgs::Int16> subL("base/wheel_lv", wheelLvCb);
 
-// set right wheel velocity [-100, 100] + --> forward
+// set right wheel velocity + --> forward
 void wheelRvCb(const std_msgs::Int16& cmd_msg) {
-  valueR = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
-  servoR.write(map(valueR, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 180, 0));   
+  vwRset = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
+  servoR.write(mapf(vwRset, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 180, 0));   
 }
 
 ros::Subscriber<std_msgs::Int16> subR("base/wheel_rv", wheelRvCb);
