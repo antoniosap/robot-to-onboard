@@ -39,8 +39,8 @@
 #include <stdint.h>
 
 //------------------------------------------------------------------------------
-#define BANNER1  "*-ROS BASE LINK-*"
-#define VERSION  "*---20181228---*"
+#define BANNER1  "*-BASE LINK-*"
+#define VERSION  "*-20210623--*"
 
 //-- DEBUG ---------------------------------------------------------------------
 #define UART_ECHO           (0)
@@ -72,14 +72,31 @@ CRGB fastleds[NUM_LEDS];
 
 //-- BUZZER --------------------------------------------------------------------
 
-//-- SERVO ---------------------------------------------------------------------
+//-- SERVO + PID CONTROLLER ----------------------------------------------------
 #include <Servo.h>
 
 #define PWM_WHEEL_L       (3)
 #define PWM_WHEEL_R       (2)
 Servo servoL;
+float xwL[3];             // left wheel position X @ t0 t1 t2
+float vwL[2];             // left wheel velocity V @ dt0 dt1
+float awL;                // left wheel acceleration A @ d2t0
+unsigned long xtL[3];     // left wheel position timestamp X @ t0 t1 t2
+unsigned long vtL[2];     // left wheel velocity V timestamp @ dt0 dt1
+unsigned long atL;        // left wheel acceleration A timestamp @ d2t0
+
 Servo servoR;
+float xwR[3];             // right wheel position X @ t0 t1 t2
+float vwR[2];             // right wheel velocity V @ dt0 dt1
+float awR;                // right wheel acceleration A @ d2t0
+unsigned long xtR[3];     // right wheel position timestamp X @ t0 t1 t2
+unsigned long vtR[2];     // right wheel velocity V timestamp @ dt0 dt1
+unsigned long atR;        // right wheel acceleration A timestamp @ d2t0
+
+#include <Derivs_Limiter.h>
+Derivs_Limiter limiterCamPan = Derivs_Limiter(100, 75);
 Servo camPan;
+Derivs_Limiter limiterCamTilt = Derivs_Limiter(100, 75);
 Servo camTilt;
 
 //-- SONAR ---------------------------------------------------------------------
