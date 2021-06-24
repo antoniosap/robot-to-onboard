@@ -191,6 +191,87 @@ float mapf(float value, float fromLow, float fromHigh, float toLow, float toHigh
   return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
 } 
 
+//-- CONSOLE -------------------------------------------------------------------
+#include <SimpleCLI.h>
+
+SimpleCLI cli;
+Command cmdSTP;
+Command cmdSTA;
+Command cmdCAM;
+Command cmdIR;
+Command cmdLIGHT;
+Command cmdSTRIP_LED;
+Command cmdSTATUS_LED;
+Command cmdAP;
+Command cmdRP;
+Command cmdZP;
+
+void cbSTP(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbSTA(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbCAM(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbIR(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbLIGHT(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbSTRIP_LED(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbSTATUS_LED(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbAP(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbRP(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void cbZP(cmd* cmdPtr) {
+    Command cmd(cmdPtr);
+}
+
+void consoleInit() {
+  cmdSTP = cli.addCommand("STP", cbSTP);
+  cmdSTA = cli.addCommand("STA", cbSTA);
+  cmdSTA.addArgument("X");
+  cmdSTA.addArgument("Z");
+  cmdSTA.addArgument("L");
+  cmdSTA.addArgument("T");
+  cmdCAM = cli.addCommand("CAM", cbCAM);
+  cmdCAM.addArgument("X");
+  cmdCAM.addArgument("Y");
+  cmdIR = cli.addCommand("IR", cbIR);
+  cmdIR.addFlagArgument("S");
+  cmdLIGHT = cli.addCommand("LIGHT", cbLIGHT);
+  cmdLIGHT.addFlagArgument("S");
+  cmdSTRIP_LED = cli.addCommand("STRIP_LED", cbSTRIP_LED);
+  cmdSTRIP_LED.addArgument("R");
+  cmdSTRIP_LED.addArgument("G");
+  cmdSTRIP_LED.addArgument("B");
+  cmdSTRIP_LED.addArgument("I");
+  cmdSTATUS_LED = cli.addCommand("STATUS_LED", cbSTATUS_LED);
+  cmdSTATUS_LED.addFlagArgument("S");
+  cmdAP = cli.addCommand("AP", cbAP);
+  cmdRP = cli.addCommand("RP", cbRP);
+  cmdZP = cli.addCommand("ZP", cbZP);
+}
+
 //-- ROS INTERFACE -------------------------------------------------------------
 // sites: https://answers.ros.org/question/164191/rosserial-arduino-cant-connect-arduino-micro/
 //#define  USE_USBCON
