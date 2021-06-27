@@ -9,18 +9,22 @@ posizione: [-1..0..+1] float
 pulse: durata in sec float
 
 STP                             arresto
-STA X Z L T                     imposta velocita X avanti
+STA -X <float> -Z  <float> -L  <float> -T  <float>      
+                                imposta velocita X avanti
                                 indietro Z sinistra / destra,
                                 L = impulsi encoder da percorrere, se non indicato non è limitato 
                                 T = pulse timeout max default 1 secondo (float)
-CAM X Y                         posizione camera X pan Y tilt
-IR 1/0                          infrared light camera on/off
-LIGHT 1/0                       white light camera on/off
-STRIP_LED R G B I               led matek [0.255] I=index [0..5]
-STATUS_LED 1/0
+CAM -X <float> -Y <float>       posizione camera X pan Y tilt, zero = centro
+IR -S                           infrared light camera on/off -S=1
+LIGHT -S                        white light camera on/off
+STRIP_LED -R i -G i -B i -I j   led matek i=[0.255] j=index [0..5]
+STATUS_LED -S
 AP                              ritorna la posizione corrente in impulsi assoluti
+>> L value R value
 RP                              ritorna la posizione corrente in impulsi relativi all'ultimo comando
+>> L value R value
 ZP                              azzera gli impulsi assoluti
+BUZ -S                          buzzer on/off
 
 
 risposte:

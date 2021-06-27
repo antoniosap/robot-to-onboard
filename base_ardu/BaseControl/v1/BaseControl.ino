@@ -344,7 +344,7 @@ std_msgs::Int16 rCount;
 ros::Publisher lCountPub("base/lwheel", &lCount);
 ros::Publisher rCountPub("base/rwheel", &rCount);
 
-void encoderInit() {
+void pulserInit() {
   // quadrature
   //leftEnc.write(0);
   //rightEnc.write(0);
@@ -369,7 +369,7 @@ void onRightPulse() {
   }
 }
 
-void encoderProcess() {
+void pulserProcess() {
   // quadrature
   //int16_t ln = leftEnc.read();
   //int16_t rn = rightEnc.read();
@@ -709,7 +709,7 @@ void setup(){
   WDT_Enable( WDT, 0x2000 | wdp_ms | ( wdp_ms << 16 ));
   //
   buttonInit();
-  encoderInit();
+  pulserInit();
   
   nh.getHardware()->setBaud(UART_BAUDRATE);
   nh.initNode();
@@ -760,7 +760,7 @@ void loop() {
   ledProcess();
   nh.spinOnce();
   buttonProcess();
-  encoderProcess();
+  pulserProcess();
   
   WATCHDOG_RESET;
 }

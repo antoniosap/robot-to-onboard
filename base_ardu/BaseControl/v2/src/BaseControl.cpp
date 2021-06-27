@@ -39,8 +39,8 @@
 #include <stdint.h>
 
 //------------------------------------------------------------------------------
-#define BANNER1  "*-BASE LINK-*"
-#define VERSION  "*-20210623--*"
+#define BANNER1  "I:BASE LINK"
+#define VERSION  "I:20210623"
 
 //-- DEBUG ---------------------------------------------------------------------
 #define UART_ECHO           (0)
@@ -74,6 +74,7 @@ CRGB fastleds[NUM_LEDS];
 
 //-- SERVO + PID CONTROLLER ----------------------------------------------------
 #include <Servo.h>
+#include <PID_v1.h>
 
 #define PWM_WHEEL_L       (3)
 #define PWM_WHEEL_R       (2)
@@ -85,26 +86,25 @@ CRGB fastleds[NUM_LEDS];
 #define consKi            0.05
 #define consKd            0.25
 
+double vwXset;          // linear axis X velocity V
+double vwZset;          // angular axis Z velocity V
 Servo servoL;
+double vwLin;           // left wheel velocity V  RPM
+double vwLset;          // left wheel velocity V
+double vwLout;          // left wheel velocity V
 PID wlPID(&vwLin, &vwLout, &vwLset, consKp, consKi, consKd, DIRECT);
-float xwLin[2];        // left wheel position X
-float vwLin;           // left wheel velocity V
-float vwLset;          // left wheel velocity V
-float vwLout;          // left wheel velocity V
-float awL;             // left wheel acceleration A
 
 Servo servoR;
+double vwRin;           // right wheel velocity V  RPM
+double vwRset;          // right wheel velocity V
+double vwRout;          // right wheel velocity V
 PID wrPID(&vwRin, &vwRout, &vwRset, consKp, consKi, consKd, DIRECT);
-float xwRin[2];        // right wheel position X
-float vwRin;           // right wheel velocity V
-float vwRset;          // right wheel velocity V
-float vwRout;          // right wheel velocity V
-float awR;             // right wheel acceleration A
 
+//-- CAMERA SERVOS -------------------------------------------------------------
 #include <Derivs_Limiter.h>
-Derivs_Limiter limiterCamPan = Derivs_Limiter(100, 75);
+
+Derivs_Limiter camLimiter = Derivs_Limiter(100, 75); // velocityLimit, accelerationLimit
 Servo camPan;
-Derivs_Limiter limiterCamTilt = Derivs_Limiter(100, 75);
 Servo camTilt;
 
 //-- SONAR ---------------------------------------------------------------------
@@ -191,6 +191,53 @@ float mapf(float value, float fromLow, float fromHigh, float toLow, float toHigh
   return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow;
 } 
 
+//-- INTERFACE -------------------------------------------------------------
+#define AXIS_WHEEL_MIN  (-1.0)
+#define AXIS_WHEEL_MAX  (+1.0)
+#define WHEEL_R_MM      (79.0 / 2.0)
+#define WHEEL_L_MM      (280.0)
+
+// set camera pan [0, 180] + --> left (ref. on base frame, face forward)
+int camPanValue;
+// set camera tilt [0, 180] + --> down(ref. on base frame)
+int camTiltValue;
+
+//-- SINGLE PULSE MOTOR FEEDBACK  --------------------------------------------
+#define WHEEL_MAX_RPM        (60)
+#define PULSE_REVOLUTION     (3.0)
+#define PULSE_LEFT_PIN       (39)
+#define PULSE_RIGHT_PIN      (40)
+
+int32_t xwLrel;         // left wheel position X relative
+int32_t xwLtim;         // left wheel timing X relative
+int32_t xwRrel;         // right wheel position X relative
+int32_t xwRtim;         // right wheel timing X relative
+int32_t xwLabs;         // left wheel position X absolute
+int32_t xwRabs;         // right wheel position X absolute
+
+void pulserInit() {
+  attachInterrupt(PULSE_LEFT_PIN, onLeftPulse, FALLING);
+  attachInterrupt(PULSE_RIGHT_PIN, onRightPulse, FALLING);
+}
+
+void onLeftPulse() {
+  xwLrel++;
+  xwLabs++;
+  vwLin = ((millis() - xwLtim) * 60 * 1000) / PULSE_REVOLUTION; // RPM dx = v
+  xwLtim = millis();
+}
+
+void onRightPulse() {
+  xwRrel++;
+  xwRabs++;
+  vwRin = ((millis() - xwRtim) * 60 * 1000) / PULSE_REVOLUTION; // RPM dx = v
+  xwRtim = millis();
+}
+
+void pulserProcess() {
+  // single pulser --> no operations
+}
+
 //-- CONSOLE -------------------------------------------------------------------
 #include <SimpleCLI.h>
 
@@ -205,6 +252,7 @@ Command cmdSTATUS_LED;
 Command cmdAP;
 Command cmdRP;
 Command cmdZP;
+Command cmdBUZ;
 
 void cbSTP(cmd* cmdPtr) {
     Command cmd(cmdPtr);
@@ -212,38 +260,113 @@ void cbSTP(cmd* cmdPtr) {
 
 void cbSTA(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument xArg = cmd.getArgument("X");
+    Argument zArg = cmd.getArgument("Z");
+    //Argument lArg = cmd.getArgument("L"); // unused
+    //Argument tArg = cmd.getArgument("T"); // unused
+    float x = xArg.getValue().toFloat();
+    float z = zArg.getValue().toFloat();
+    //float l = lArg.getValue().toFloat();
+    //float t = tArg.getValue().toFloat();
+    x = constrain(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
+    vwZset = constrain(z, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
+    vwXset = mapf(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX, -WHEEL_MAX_RPM, WHEEL_MAX_RPM);
+    vwLset = vwXset + vwXset * vwZset;
+    vwRset = vwXset - vwXset * vwZset;
 }
 
 void cbCAM(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument xArg = cmd.getArgument("X");
+    Argument yArg = cmd.getArgument("Y");
+    int x = xArg.getValue().toInt();
+    int y = yArg.getValue().toInt();
+    x = constrain(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
+    y = constrain(y, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
+    camPanValue = mapf(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX, 0, 180);
+    camTiltValue = mapf(y, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX, 0, 180);
+
 }
 
 void cbIR(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument argS = cmd.getArgument("S");
+    bool S = argS.isSet();
+    if (S) {
+      digitalWrite(CAMERA_MOUNT_IR_PIN, LOW);
+    } else {
+      digitalWrite(CAMERA_MOUNT_IR_PIN, HIGH);
+    }
 }
 
 void cbLIGHT(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument argS = cmd.getArgument("S");
+    bool S = argS.isSet();
+    if (S) {
+      digitalWrite(CAMERA_MOUNT_LIGHT_PIN, HIGH);
+    } else {
+      digitalWrite(CAMERA_MOUNT_LIGHT_PIN, LOW);
+    }
 }
 
+//
+// matek led strip RGB
+// limit: 15.12.2018 only 1 LED a is the index
+// TODO: extend to 6 leds
+//    custom messages:
+//    http://wiki.ros.org/rosserial/Tutorials/Adding%20Other%20Messages
+//
 void cbSTRIP_LED(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument rArg = cmd.getArgument("R");
+    Argument gArg = cmd.getArgument("G");
+    Argument bArg = cmd.getArgument("B");
+    Argument iArg = cmd.getArgument("I");
+    int r = rArg.getValue().toInt();
+    int g = gArg.getValue().toInt();
+    int b = bArg.getValue().toInt();
+    int i = iArg.getValue().toInt();
+    byte led_index = constrain(i, 0, NUM_LEDS - 1);
+    fastleds[led_index].setRGB(r, g, b);
+    FastLED.show();
 }
 
 void cbSTATUS_LED(cmd* cmdPtr) {
     Command cmd(cmdPtr);
+    Argument argS = cmd.getArgument("S");
+    bool S = argS.isSet();
+    if (S) {
+      ledSet('H');
+    } else {
+      ledSet('Z');
+    }
 }
 
 void cbAP(cmd* cmdPtr) {
-    Command cmd(cmdPtr);
+    Serial.print("L" + String(xwLabs) + "R" + String(xwRabs));
 }
 
 void cbRP(cmd* cmdPtr) {
-    Command cmd(cmdPtr);
+    Serial.print("L" + String(xwLrel) + "R" + String(xwRrel));
 }
 
 void cbZP(cmd* cmdPtr) {
-    Command cmd(cmdPtr);
+    xwLabs = 0;
+    xwRabs = 0;
+    Serial.print("OK");
+}
+
+// buzzer tone
+void cbBUZ(cmd* cmdPtr) {
+  Command cmd(cmdPtr);
+  Argument argS = cmd.getArgument("S");
+  bool S = argS.isSet();
+  if (S) {
+    digitalWrite(FAST_BUZZER, LED_ON);
+  } else {
+    digitalWrite(FAST_BUZZER, LED_OFF);
+  }
 }
 
 void consoleInit() {
@@ -270,217 +393,27 @@ void consoleInit() {
   cmdAP = cli.addCommand("AP", cbAP);
   cmdRP = cli.addCommand("RP", cbRP);
   cmdZP = cli.addCommand("ZP", cbZP);
+  cmdBUZ = cli.addCommand("BUZ", cbBUZ);
+  cmdBUZ.addFlagArgument("S");
 }
 
-//-- ROS INTERFACE -------------------------------------------------------------
-// sites: https://answers.ros.org/question/164191/rosserial-arduino-cant-connect-arduino-micro/
-//#define  USE_USBCON
-// 
-//#include <ros.h>
-//#include <std_msgs/Int16.h>
-//#include <std_msgs/Int32.h>
-//#include <std_msgs/Bool.h>
-//#include <std_msgs/Int16MultiArray.h>
-//#include <std_msgs/ColorRGBA.h>
+void consoleProcess() {
+  if (Serial.available()) {
+      String input = Serial.readStringUntil('\n');
 
-#define ROS_WHEEL_MIN   (-1.0)
-#define ROS_WHEEL_MAX   (+1.0)
-//ros::NodeHandle  nh;
+      if (input.length() > 0) {
+        Serial.print("# ");
+        Serial.println(input);
 
-//int valueL = 0;
-//int valueR = 0;
-
-// set left wheel velocity + --> forward
-void wheelLvCb(const std_msgs::Int16& cmd_msg) {
-  vwLset = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
-  servoL.write(mapf(vwLset, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 0, 180));  
-}
-
-ros::Subscriber<std_msgs::Int16> subL("base/wheel_lv", wheelLvCb);
-
-// set right wheel velocity + --> forward
-void wheelRvCb(const std_msgs::Int16& cmd_msg) {
-  vwRset = constrain(cmd_msg.data, ROS_WHEEL_MIN, ROS_WHEEL_MAX);
-  servoR.write(mapf(vwRset, ROS_WHEEL_MIN, ROS_WHEEL_MAX, 180, 0));   
-}
-
-ros::Subscriber<std_msgs::Int16> subR("base/wheel_rv", wheelRvCb);
-
-// set status LED
-void statusLEDCb(const std_msgs::Bool& cmd_msg) {
-  if (cmd_msg.data) {
-      ledSet('H');
-  } else {
-      ledSet('Z');
+        cli.parse(input);
+      }
   }
-}
 
-ros::Subscriber<std_msgs::Bool> subStatusLED("base/status_led", statusLEDCb);
+  if (cli.errored()) {
+      CommandError cmdError = cli.getError();
 
-// camera mount LED
-void camLightLEDCb(const std_msgs::Bool& cmd_msg) {
-  if (cmd_msg.data) {
-      digitalWrite(CAMERA_MOUNT_LIGHT_PIN, HIGH);
-  } else {
-      digitalWrite(CAMERA_MOUNT_LIGHT_PIN, LOW);
-  }
-}
-
-ros::Subscriber<std_msgs::Bool> subLightLED("base/cam_light_led", camLightLEDCb);
-
-// camera mount IR LED
-void camIrLEDCb(const std_msgs::Bool& cmd_msg) {
-  if (cmd_msg.data) {
-      digitalWrite(CAMERA_MOUNT_IR_PIN, LOW);
-  } else {
-      digitalWrite(CAMERA_MOUNT_IR_PIN, HIGH);
-  }
-}
-
-ros::Subscriber<std_msgs::Bool> subIrLED("base/cam_ir_led", camIrLEDCb);
-
-// set camera pan [0, 180] + --> left (ref. on base frame, face forward)
-int camPanValue = 90;
-
-void camPanCb(const std_msgs::Int16& cmd_msg) {
-  camPanValue = constrain(cmd_msg.data, 0, 180);
-  camPan.write(camPanValue);  
-}
-
-ros::Subscriber<std_msgs::Int16> camPanMount("base/cam_pan", camPanCb);
-
-// set camera tilt [0, 180] + --> down(ref. on base frame)
-int camTiltValue = 90;
-
-void camTiltCb(const std_msgs::Int16& cmd_msg) {
-  camTiltValue = constrain(cmd_msg.data, 0, 180);
-  camTilt.write(camTiltValue);  
-}
-
-ros::Subscriber<std_msgs::Int16> camTiltMount("base/cam_tilt", camTiltCb);
-
-// buzzer tone
-void buzzerCb(const std_msgs::Bool& cmd_msg) {
-  if (cmd_msg.data) {
-      digitalWrite(FAST_BUZZER, LED_ON);
-  } else {
-      digitalWrite(FAST_BUZZER, LED_OFF);
-  }
-}
-
-ros::Subscriber<std_msgs::Bool> buzzer("base/buzzer", buzzerCb);
-
-//
-// matek led strip RGB
-// limit: 15.12.2018 only 1 LED a is the index
-// TODO: extend to 6 leds
-//    custom messages:
-//    http://wiki.ros.org/rosserial/Tutorials/Adding%20Other%20Messages
-//
-void stripLedCb(const std_msgs::ColorRGBA& cmd_msg) {
-  byte led_index = constrain(cmd_msg.a, 0, NUM_LEDS - 1);
-  fastleds[led_index].setRGB(cmd_msg.r, cmd_msg.g, cmd_msg.b);
-  FastLED.show();
-}
-
-ros::Subscriber<std_msgs::ColorRGBA> stripLed("base/strip_led", stripLedCb);
-
-
-std_msgs::Bool bshut;
-std_msgs::Bool bemer;
-#ifdef HAVE_BUMPERS
-std_msgs::Bool bbumpN;
-std_msgs::Bool bbumpNE; 
-std_msgs::Bool bbumpE;
-std_msgs::Bool bbumpSE;
-std_msgs::Bool bbumpS;
-std_msgs::Bool bbumpSW;
-std_msgs::Bool bbumpW;
-std_msgs::Bool bbumpNW;
-#endif
-std_msgs::Bool bpirN;
-std_msgs::Bool bpirSE;
-std_msgs::Bool bpirSW;
-
-ros::Publisher bshutPub("base/btn_shutdown_cb", &bshut);
-ros::Publisher bemerPub("base/btn_emergency", &bemer);
-#ifdef HAVE_BUMPERS
-ros::Publisher bbumpNPub("base/bump_n", &bbumpN);
-ros::Publisher bbumpNEPub("base/bump_ne", &bbumpNE);
-ros::Publisher bbumpEPub("base/bump_e", &bbumpE);
-ros::Publisher bbumpSEPub("base/bump_se", &bbumpSE);
-ros::Publisher bbumpSPub("base/bump_s", &bbumpS);
-ros::Publisher bbumpSWPub("base/bump_sw", &bbumpSW);
-ros::Publisher bbumpWPub("base/bump_w", &bbumpW);
-ros::Publisher bbumpNWPub("base/bump_nw", &bbumpNW);
-#endif
-ros::Publisher bpirNPub("base/pir_n", &bpirN);
-ros::Publisher bpirSEPub("base/pir_se", &bpirSE);
-ros::Publisher bpirSWPub("base/pir_sw", &bpirSW);
-
-//-- ENCODER DRIVER  ------------------------------------------------------------
-#include <Encoder.h>
-
-// quadrature encoder
-//Encoder leftEnc(A0, A1);
-//Encoder rightEnc(A2, A3);
-// single pulse counter
-
-#define PULSE_LEFT_PIN       (39)
-#define PULSE_RIGHT_PIN      (40)
-
-int16_t ln;
-int16_t rn;
-int16_t leftPosition;
-int16_t rightPosition;
-
-std_msgs::Int16 lCount;
-std_msgs::Int16 rCount;
-
-ros::Publisher lCountPub("base/lwheel", &lCount);
-ros::Publisher rCountPub("base/rwheel", &rCount);
-
-void encoderInit() {
-  // quadrature
-  //leftEnc.write(0);
-  //rightEnc.write(0);
-  // single counter
-  attachInterrupt(PULSE_LEFT_PIN, onLeftPulse, FALLING);
-  attachInterrupt(PULSE_RIGHT_PIN, onRightPulse, FALLING);
-}
-
-void onLeftPulse() {
-  if (valueL > 0) {
-    ln++;
-  } else {
-    ln--;
-  }
-}
-
-void onRightPulse() {
-  if (valueR > 0) {
-    rn++;
-  } else {
-    rn--;
-  }
-}
-
-void encoderProcess() {
-  // quadrature
-  //int16_t ln = leftEnc.read();
-  //int16_t rn = rightEnc.read();
-  // single. no op.
-  
-  if (ln != leftPosition) {
-    leftPosition = ln;
-    lCount.data = leftPosition;
-    lCountPub.publish(&lCount);
-  }
-  
-  if (rn != rightPosition) {
-    rightPosition = rn;
-    rCount.data = rightPosition;
-    rCountPub.publish(&rCount);
+      Serial.print("E: ");
+      Serial.println(cmdError.toString());
   }
 }
 
@@ -544,31 +477,26 @@ void buttonProcess() {
   
   if (BTNshutValue != BTNshut.read()) {
     BTNshutValue = BTNshut.read();
-    bshut.data = !BTNshutValue;
-    bshutPub.publish(&bshut);
     if (BTNshutValue == LOW) {
         ledSet('B');
+        Serial.print("BTN_SHUT 0");
     } else {
-
+        Serial.print("BTN_SHUT 1");
     }
   }
 
   if (BTNemerValue != BTNemer.read()) {
     BTNemerValue = BTNemer.read();
-    bemer.data = BTNemerValue;
-    bemerPub.publish(&bemer);
     if (BTNemerValue == LOW) {
-
+      Serial.print("BTN_EME 0");
     } else {
-
+      Serial.print("BTN_EME 1");
     }
   }
 
 #ifdef HAVE_BUMPERS
   if (BTNbumpNValue != BTNbumpN.read()) {
     BTNbumpNValue = BTNbumpN.read();
-    bbumpN.data = BTNbumpNValue;
-    bbumpNPub.publish(&bbumpN);
     if (BTNbumpNValue == LOW) {
 
     } else {
@@ -578,8 +506,6 @@ void buttonProcess() {
 
   if (BTNbumpNEValue != BTNbumpNE.read()) {
     BTNbumpNEValue = BTNbumpNE.read();
-    bbumpNE.data = BTNbumpNEValue;
-    bbumpNEPub.publish(&bbumpNE);
     if (BTNbumpNEValue == LOW) {
 
     } else {
@@ -589,8 +515,6 @@ void buttonProcess() {
 
   if (BTNbumpEValue != BTNbumpE.read()) {
     BTNbumpEValue = BTNbumpE.read();
-    bbumpE.data = BTNbumpEValue;
-    bbumpEPub.publish(&bbumpE);
     if (BTNbumpEValue == LOW) {
 
     } else {
@@ -600,8 +524,6 @@ void buttonProcess() {
 
   if (BTNbumpSEValue != BTNbumpSE.read()) {
     BTNbumpSEValue = BTNbumpSE.read();
-    bbumpSE.data = BTNbumpSEValue;
-    bbumpSEPub.publish(&bbumpSE);
     if (BTNbumpSEValue == LOW) {
 
     } else {
@@ -611,8 +533,6 @@ void buttonProcess() {
 
   if (BTNbumpSValue != BTNbumpS.read()) {
     BTNbumpSValue = BTNbumpS.read();
-    bbumpS.data = BTNbumpSValue;
-    bbumpSPub.publish(&bbumpS);
     if (BTNbumpSValue == LOW) {
 
     } else {
@@ -622,8 +542,6 @@ void buttonProcess() {
 
   if (BTNbumpSWValue != BTNbumpSW.read()) {
     BTNbumpSWValue = BTNbumpSW.read();
-    bbumpSW.data = BTNbumpSWValue;
-    bbumpSWPub.publish(&bbumpSW);
     if (BTNbumpSWValue == LOW) {
 
     } else {
@@ -632,8 +550,6 @@ void buttonProcess() {
   }
 
   if (BTNbumpWValue != BTNbumpW.read()) {
-    bbumpW.data = BTNbumpWValue;
-    bbumpWPub.publish(&bbumpW);
     BTNbumpWValue = BTNbumpW.read();
     if (BTNbumpWValue == LOW) {
 
@@ -644,8 +560,6 @@ void buttonProcess() {
 
   if (BTNbumpNWValue != BTNbumpNW.read()) {
     BTNbumpNWValue = BTNbumpNW.read();
-    bbumpNW.data = BTNbumpNWValue;
-    bbumpNWPub.publish(&bbumpNW);
     if (BTNbumpNWValue == LOW) {
 
     } else {
@@ -656,34 +570,28 @@ void buttonProcess() {
 
   if (BTNpirNValue != BTNpirN.read()) {
     BTNpirNValue = BTNpirN.read();
-    bpirN.data = BTNpirNValue;
-    bpirNPub.publish(&bpirN);
     if (BTNpirNValue == LOW) {
-
+      Serial.print("PIR_N 0");
     } else {
-
+      Serial.print("PIR_N 1");
     }
   }
 
   if (BTNpirSEValue != BTNpirSE.read()) {
     BTNpirSEValue = BTNpirSE.read();
-    bpirSE.data = BTNpirSEValue;
-    bpirSEPub.publish(&bpirSE);
     if (BTNpirSEValue == LOW) {
-
+      Serial.print("PIR_SE 0");
     } else {
-
+      Serial.print("PIR_SE 1");
     }
   }
 
   if (BTNpirSWValue != BTNpirSW.read()) {
     BTNpirSWValue = BTNpirSW.read();
-    bpirSW.data = BTNpirSWValue;
-    bpirSWPub.publish(&bpirSW);
     if (BTNpirSWValue == LOW) {
-
+      Serial.print("PIR_SW 0");
     } else {
-
+      Serial.print("PIR_SW 1");
     }
   }
 }
@@ -711,15 +619,12 @@ void ledNextState(unsigned int delayms) {
 void ledProcess(void) {
   switch (ledFunct) {
     case 'B':
-       //nh.loginfo("B");
        switch (ledState) {
          case 0:
-           //nh.loginfo("0");
            digitalWrite(LED_READY_PIN, LED_ON);
            ledNextState(LED_BLINK_SHORT_MS);
            break;
          case 1:
-           //nh.loginfo("1");
            digitalWrite(LED_READY_PIN, LED_OFF);
            ledGotoState(0, LED_BLINK_SHORT_MS);
            break;
@@ -751,14 +656,14 @@ void camMountInit() {
   // IR LIGHT ENABLED. AUTO ON LOW LIGHT
   pinMode(CAMERA_MOUNT_IR_PIN, OUTPUT);
   digitalWrite(CAMERA_MOUNT_IR_PIN, LOW);
-  //
-  nh.subscribe(subLightLED);
-  nh.subscribe(subIrLED);
-  nh.subscribe(camPanMount);
-  nh.subscribe(camTiltMount);
   // initial values: center axis
-  camPan.write(camPanValue);
-  camTilt.write(camTiltValue);
+  camPanValue = 90;
+  camTiltValue = 90;
+}
+
+void camMountprocess() {
+  camPan.write(camLimiter.calc(camPanValue));
+  camTilt.write(camLimiter.calc(camTiltValue));
 }
 
 //------------------------------------------------------------------------------
@@ -783,8 +688,8 @@ void stripLedInit() {
   fastleds[NUM_LEDS - 1] = CRGB::Green;
   FastLED.show();
   
-  nh.subscribe(buzzer);
-  nh.subscribe(stripLed);
+  // nh.subscribe(buzzer);
+  // nh.subscribe(stripLed);
 }
 
 void buzzerInit() {
@@ -805,33 +710,8 @@ void setup(){
   WDT_Enable( WDT, 0x2000 | wdp_ms | ( wdp_ms << 16 ));
   //
   buttonInit();
-  encoderInit();
-  
-  nh.getHardware()->setBaud(UART_BAUDRATE);
-  nh.initNode();
-  //
-  nh.subscribe(subL);
-  nh.subscribe(subR);
-  nh.subscribe(subStatusLED);
-  //
-  nh.advertise(bshutPub);
-  nh.advertise(bemerPub);
-#ifdef HAVE_BUMPERS
-  nh.advertise(bbumpNPub);
-  nh.advertise(bbumpNEPub);
-  nh.advertise(bbumpEPub);
-  nh.advertise(bbumpSEPub);
-  nh.advertise(bbumpSPub);
-  nh.advertise(bbumpSWPub);
-  nh.advertise(bbumpWPub);
-  nh.advertise(bbumpNWPub);
-#endif
-  nh.advertise(bpirNPub);
-  nh.advertise(bpirSEPub);
-  nh.advertise(bpirSWPub);
-  //
-  nh.advertise(lCountPub);
-  nh.advertise(rCountPub);
+  pulserInit();
+  consoleInit();
   // drive
   servoL.attach(PWM_WHEEL_L);
   servoR.attach(PWM_WHEEL_R);
@@ -840,104 +720,18 @@ void setup(){
   // Matek Board
   stripLedInit();
   buzzerInit();
-  
-  // wait until you are actually connected
-  while (!nh.connected()) {
-    WATCHDOG_RESET;
-    nh.spinOnce();
-    ledProcess();
-  }
-  nh.loginfo(BANNER1);
-  nh.loginfo(VERSION);
-  nh.loginfo("*** PLEASE, ARM MOTORS ***");
+  //
+  Serial.print(BANNER1);
+  Serial.print(VERSION);
+  Serial.print("I: *** PLEASE, ARM MOTORS ***");
 }
 
 void loop() {
+  consoleProcess();
   ledProcess();
-  nh.spinOnce();
   buttonProcess();
-  encoderProcess();
+  pulserProcess();
+  camMountprocess();
   
   WATCHDOG_RESET;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------
-/*
-   Copyright (c) 2019 Stefan Kremser
-   This software is licensed under the MIT License. See the license file for details.
-   Source: github.com/spacehuhn/SimpleCLI
- */
-
-// Watch the tutorial here: https://youtu.be/UyW-wICdnKo
-
- #include <SimpleCLI.h>
-
-SimpleCLI cli;
-
-Command cmdPing;
-Command cmdPong;
-
-void errorCallback(cmd_error* errorPtr) {
-    CommandError e(errorPtr);
-
-    Serial.println("ERROR: " + e.toString());
-
-    if (e.hasCommand()) {
-        Serial.println("Did you mean? " + e.getCommand().toString());
-    } else {
-        Serial.println(cli.toString());
-    }
-}
-
-void pongCallback(cmd* cmdPtr) {
-    Command cmd(cmdPtr);
-
-    int argNum = cmd.countArgs();
-
-    for (int i = 0; i < argNum; i++) {
-        Serial.println(cmd.getArgument(i).getValue());
-    }
-}
-
-void pingCallback(cmd* cmdPtr) {
-    Command cmd(cmdPtr);
-
-    Argument argN   = cmd.getArgument("num");
-    String   argVal = argN.getValue();
-    int n           = argVal.toInt();
-
-    Argument argStr = cmd.getArgument("str");
-    String   strVal = argStr.getValue();
-
-    Argument argC = cmd.getArgument("c");
-    bool     c    = argC.isSet();
-
-    if (c) strVal.toUpperCase();
-
-    for (int i = 0; i < n; i++) {
-        Serial.println(strVal);
-    }
-}
-
-void setup_2() {
-    Serial.begin(9600);
-    Serial.println("Hello World");
-
-    cmdPing = cli.addCommand("ping", pingCallback);
-    cmdPing.addPositionalArgument("str", "pong");
-    cmdPing.addArgument("n/um/ber,anzahl", "1");
-    cmdPing.addFlagArgument("c");
-
-    cmdPong = cli.addBoundlessCommand("pong,hello", pongCallback);
-
-    cli.setOnError(errorCallback);
-}
-
-void loop_2() {
-    if (Serial.available()) {
-        String input = Serial.readStringUntil('\n');
-        Serial.println("# " + input);
-
-        cli.parse(input);
-    }
 }
