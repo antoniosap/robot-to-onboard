@@ -9,11 +9,10 @@ posizione: [-1..0..+1] float
 pulse: durata in sec float
 
 STP                             arresto
-STA -X <float> -Z  <float> -L  <float> -T  <float>      
+STA -X <float> -Z  <float> -L  <float>
                                 imposta velocita X avanti
                                 indietro Z sinistra / destra,
-                                L = impulsi encoder da percorrere, se non indicato non è limitato 
-                                T = pulse timeout max default 1 secondo (float)
+                                // TODO L = impulsi encoder da percorrere, se non indicato non è limitato 
 CAM -X <float> -Y <float>       posizione camera X pan Y tilt, zero = centro
 IR -S                           infrared light camera on/off -S=1
 LIGHT -S                        white light camera on/off

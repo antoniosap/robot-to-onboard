@@ -13,25 +13,12 @@
  *                        14.12.2018 camera actuators
  *                        24.12.2018 camera relay test 2
  *                        19.06.2021 eliminato ros1 / ros2 interface
- *                        
- * TESTS COMMAND LINE:    rostopic pub base/status_led std_msgs/Bool True --once   ---> LED ON
- *                        rostopic pub base/status_led std_msgs/Bool False --once  ---> LED OFF
- *                        rostopic pub base/cam_light_led std_msgs/Bool False --once  ---> LED OFF
- *                        rostopic pub base/cam_light_led std_msgs/Bool True --once   ---> LED ON
+ *                        27.06.2021 new 2021 interface
+ * TESTS COMMAND LINE:    
  * 
- *                        rostopic echo base/btn_shutdown_cb    ---> True = pressed
- *                        rostopic echo base/btn_emergency   ---> True = pressed
- *                        rostopic echo base/pir_n
- *                        rostopic echo base/pir_se
- *                        rostopic echo base/pir_sw
+ * CAM COMMANDS:
  * 
- * CAM COMMANDS:          rostopic pub base/cam_pan std_msgs/Int16 90 --once
- *                        rostopic pub base/cam_tilt std_msgs/Int16 90 --once
- *                        rostopic pub base/cam_ir_led std_msgs/Bool True --once
- *                        rostopic pub base/cam_light_led std_msgs/Bool True --once
- * 
- * MATEK LEDS:            rostopic pub base/strip_led std_msgs/ColorRGBA 0 255 0 0 --once
- *                                                                       R  G  B  index [0-5]
+ * MATEK LEDS:
  ******************************************************************/
 
 #pragma GCC push_options
@@ -262,12 +249,10 @@ void cbSTA(cmd* cmdPtr) {
     Command cmd(cmdPtr);
     Argument xArg = cmd.getArgument("X");
     Argument zArg = cmd.getArgument("Z");
-    //Argument lArg = cmd.getArgument("L"); // unused
-    //Argument tArg = cmd.getArgument("T"); // unused
+    Argument lArg = cmd.getArgument("L"); // unused
     float x = xArg.getValue().toFloat();
     float z = zArg.getValue().toFloat();
-    //float l = lArg.getValue().toFloat();
-    //float t = tArg.getValue().toFloat();
+    float l = lArg.getValue().toFloat();
     x = constrain(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
     vwZset = constrain(z, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX);
     vwXset = mapf(x, AXIS_WHEEL_MIN, AXIS_WHEEL_MAX, -WHEEL_MAX_RPM, WHEEL_MAX_RPM);
@@ -687,9 +672,6 @@ void stripLedInit() {
   fastleds[0] = CRGB::Red;
   fastleds[NUM_LEDS - 1] = CRGB::Green;
   FastLED.show();
-  
-  // nh.subscribe(buzzer);
-  // nh.subscribe(stripLed);
 }
 
 void buzzerInit() {
