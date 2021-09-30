@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../../repo/launch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../../repo/teleop_twist_joy" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_ardu/BaseControl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/base_rpi/packages/py-scurve" vcs="Git" />
+  </component>
+</project>

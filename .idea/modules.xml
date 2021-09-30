@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../repo/launch/.idea/launch.iml" filepath="$PROJECT_DIR$/../../repo/launch/.idea/launch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../repo-robot/py-scurve/.idea/py-scurve.iml" filepath="$PROJECT_DIR$/../../repo-robot/py-scurve/.idea/py-scurve.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/robot-to-onboard.iml" filepath="$PROJECT_DIR$/.idea/robot-to-onboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../robo-to/ros2/.idea/ros2.iml" filepath="$PROJECT_DIR$/../robo-to/ros2/.idea/ros2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../repo/teleop_twist_joy/.idea/teleop_twist_joy.iml" filepath="$PROJECT_DIR$/../../repo/teleop_twist_joy/.idea/teleop_twist_joy.iml" />
+    </modules>
+  </component>
+</project>
