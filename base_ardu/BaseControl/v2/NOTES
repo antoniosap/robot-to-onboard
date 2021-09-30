@@ -34,3 +34,10 @@ BTN_SHUT 1/0                    bottone shutdown trigger 1/0
 PIR_N 1/0                       sensore PIR nord N trigger 1/0
 PIR_SE 1/0                      sensore PIR trigger 1/0
 PIR_SW 1/0                      sensore PIR trigger 1/0
+
+USEFUL COMMAND 11.7.2021
+--------------
+
+preparazione:
+cd $HOME/workspace-ros2/src/robot-to-onboard/base_ardu/BaseControl/v2
+pio run

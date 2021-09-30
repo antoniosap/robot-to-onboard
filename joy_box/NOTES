@@ -3,3 +3,10 @@
 
 sudo journalctl -u joy_box.service
 sudo systemctl status joy_box.service
+
+30.9.2021
+---------
+
+cross compile QT on RPI 
+[PC] > sudo apt install gcc-arm-linux-gnueabihf
+[PC] > sudo apt install g++-9-arm-linux-gnueabihf

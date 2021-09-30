@@ -1,11 +1,11 @@
 /*! @mainpage
 /******************************************************************
- * soft.vers:             ros base link control
- * arduino IDE version:   1.8.5  linux-64
+ * soft.vers:             rover base control
+ * arduino IDE version:   platformio  linux-64
  *                        
  * arduino board version: Arduino due
  * bootloader:            standard
- * libraries:             ros
+ * libraries:             
  * interface:             serial: 115200,8,N,1
  *                        
  * last revision:         11.09.2018 coding
@@ -26,7 +26,7 @@
 #include <stdint.h>
 
 //------------------------------------------------------------------------------
-#define BANNER1  "I:BASE LINK"
+#define BANNER1  "I:BASE-LINK"
 #define VERSION  "I:20210623"
 
 //-- DEBUG ---------------------------------------------------------------------
