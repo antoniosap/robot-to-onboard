@@ -57,21 +57,10 @@ import Qt.labs.settings 1.0
 
 ApplicationWindow {
     id: window
-    width: 360
+    width: 400
     height: 520
     visible: true
     title: "JOY BOX LCD PANEL"
-
-    function help() {
-        let displayingControl = listView.currentIndex !== -1
-        let currentControlName = displayingControl
-            ? listView.model.get(listView.currentIndex).title.toLowerCase() : ""
-        let url = "https://doc.qt.io/qt-5/"
-            + (displayingControl
-               ? "qml-qtquick-controls2-" + currentControlName + ".html"
-               : "qtquick-controls2-qmlmodule.html");
-        Qt.openUrlExternally(url)
-    }
 
     Settings {
         id: settings
@@ -126,7 +115,7 @@ ApplicationWindow {
 
             Label {
                 id: titleLabel
-                text: listView.currentItem ? listView.currentItem.text : "Gallery"
+                text: listView.currentItem ? listView.currentItem.text : "joy box panels"
                 font.pixelSize: 20
                 elide: Label.ElideRight
                 horizontalAlignment: Qt.AlignHCenter
@@ -145,10 +134,6 @@ ApplicationWindow {
                     Action {
                         text: "Settings"
                         onTriggered: settingsDialog.open()
-                    }
-                    Action {
-                        text: "Help"
-                        onTriggered: help()
                     }
                     Action {
                         text: "About"
@@ -184,6 +169,7 @@ ApplicationWindow {
             }
 
             model: ListModel {
+                ListElement { title: "Telemetry Ground Unit"; source: "qrc:/pages/TelemetryGroundUnitPage.qml" }
                 ListElement { title: "BusyIndicator"; source: "qrc:/pages/BusyIndicatorPage.qml" }
                 ListElement { title: "Button"; source: "qrc:/pages/ButtonPage.qml" }
                 ListElement { title: "CheckBox"; source: "qrc:/pages/CheckBoxPage.qml" }
@@ -223,33 +209,14 @@ ApplicationWindow {
         initialItem: Pane {
             id: pane
 
-            Image {
-                id: logo
-                width: pane.availableWidth / 2
-                height: pane.availableHeight / 2
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: -50
-                fillMode: Image.PreserveAspectFit
-                source: "images/qt-logo.png"
-            }
-
             Label {
                 text: "Qt Quick Controls 2 provides a set of controls that can be used to build complete interfaces in Qt Quick."
                 anchors.margins: 20
-                anchors.top: logo.bottom
                 anchors.left: parent.left
                 anchors.right: parent.right
-                anchors.bottom: arrow.top
                 horizontalAlignment: Label.AlignHCenter
                 verticalAlignment: Label.AlignVCenter
                 wrapMode: Label.Wrap
-            }
-
-            Image {
-                id: arrow
-                source: "images/arrow.png"
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
             }
         }
     }
@@ -313,7 +280,7 @@ ApplicationWindow {
         id: aboutDialog
         modal: true
         focus: true
-        title: "About"
+        title: "joy box"
         x: (window.width - width) / 2
         y: window.height / 6
         width: Math.min(window.width, window.height) / 3 * 2
@@ -325,16 +292,7 @@ ApplicationWindow {
 
             Label {
                 width: aboutDialog.availableWidth
-                text: "The Qt Quick Controls 2 module delivers the next generation user interface controls based on Qt Quick."
-                wrapMode: Label.Wrap
-                font.pixelSize: 12
-            }
-
-            Label {
-                width: aboutDialog.availableWidth
-                text: "In comparison to the desktop-oriented Qt Quick Controls 1, Qt Quick Controls 2 "
-                    + "are an order of magnitude simpler, lighter and faster, and are primarily targeted "
-                    + "towards embedded and mobile platforms."
+                text: "Per spegnere premere contemporaneamente i 4 pulsanti \nX Y A B"
                 wrapMode: Label.Wrap
                 font.pixelSize: 12
             }

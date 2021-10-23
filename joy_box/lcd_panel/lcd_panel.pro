@@ -30,6 +30,7 @@ RESOURCES += \
     pages/SwipeViewPage.qml \
     pages/SwitchPage.qml \
     pages/TabBarPage.qml \
+    pages/TelemetryGroundUnitPage.qml \
     pages/TextAreaPage.qml \
     pages/TextFieldPage.qml \
     pages/ToolTipPage.qml \
@@ -62,3 +63,6 @@ RESOURCES += \
     images/qt-logo@4x.png
 
 INSTALLS += target
+
+DISTFILES += \
+    pages/TelemetryGroundUnitPage.qml
