@@ -57,9 +57,10 @@ import Qt.labs.settings 1.0
 
 ApplicationWindow {
     id: window
-    width: 400
-    height: 520
+    width: 480      // raspberry LCD 3.5
+    height: 320     // raspberry LCD 3.5
     visible: true
+    flags: "FramelessWindowHint"
     title: "JOY BOX LCD PANEL"
 
     Settings {
@@ -209,14 +210,27 @@ ApplicationWindow {
         initialItem: Pane {
             id: pane
 
-            Label {
-                text: "Qt Quick Controls 2 provides a set of controls that can be used to build complete interfaces in Qt Quick."
-                anchors.margins: 20
-                anchors.left: parent.left
-                anchors.right: parent.right
-                horizontalAlignment: Label.AlignHCenter
-                verticalAlignment: Label.AlignVCenter
-                wrapMode: Label.Wrap
+            Grid {
+                columns: 2
+                spacing: 2
+
+                Label {
+                    text: "pan"
+                }
+
+                Slider {
+                    id: pan
+                    value: 0.5
+                }
+
+                Label {
+                    text: "tilt"
+                }
+
+                Slider {
+                    id: tilt
+                    value: 0.5
+                }
             }
         }
     }
