@@ -1,6 +1,7 @@
 25.5.2021
 ---------
 
+sudo systemctl daemon-reload
 sudo journalctl -u joy_box.service
 sudo systemctl status joy_box.service
 
